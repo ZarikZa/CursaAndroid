@@ -1,0 +1,8 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Kursa" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:colorPrimary">#1c1c1c</item>
+    </style>
+
+    <style name="Theme.Kursa" parent="Base.Theme.Kursa" />
+</resources>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1c1c1c"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Дополнительные возможности"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:textColor="#E0E0E0"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/krug_for_fon_recycl"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Тесты"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="20dp"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/tenslovtest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Тест на последние 10 слов"
+            android:backgroundTint="#292828"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="8dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/vseSlovaBtm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Тест на все слова"
+            android:backgroundTint="#292828"
+            android:layout_marginBottom="15dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/darker_gray"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/krug_for_fon_recycl"
+        android:layout_marginTop="240dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ежедневное испытание"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvTimeRemaining"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обновиться через 2:30:15"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="8dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/ezednevIspitBtm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Пройти испытание"
+            android:backgroundTint="#292828"
+            android:layout_marginBottom="15dp"
+            android:textAlignment="textStart"
+            android:textColor="@android:color/darker_gray"/>
+    </LinearLayout>
+</FrameLayout>

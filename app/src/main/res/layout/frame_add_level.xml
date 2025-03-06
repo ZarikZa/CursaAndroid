@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1c1c1c"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="Добавить уровень"
+            android:textColor="#E0E0E0"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.026" />
+
+        <EditText
+            android:id="@+id/levelNameEditText"
+            android:layout_width="344dp"
+            android:layout_height="47dp"
+            android:background="@drawable/krug_edit_text"
+            android:fontFamily="sans-serif"
+            android:hint="Название уровня"
+            android:padding="10dp"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#E0E0E0"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.507"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.053" />
+
+        <LinearLayout
+            android:id="@+id/wordsContainer"
+            android:layout_width="344dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/levelNameEditText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.507">
+
+            <EditText
+                android:id="@+id/englishWord1"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 1"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation1"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 1"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord2"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 2"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation2"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 2"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord3"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 3"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation3"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 3"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord4"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 4"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation4"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 4"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord5"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 5"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation5"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 5"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord6"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 6"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation6"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 6"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord7"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 7"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation7"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 7"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord8"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 8"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation8"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 8"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord9"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 9"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation9"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 9"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/englishWord10"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Английское слово 10"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/translation10"
+                android:layout_width="match_parent"
+                android:layout_height="47dp"
+                android:background="@drawable/krug_edit_text"
+                android:fontFamily="sans-serif"
+                android:hint="Перевод 10"
+                android:padding="10dp"
+                android:textColor="#E0E0E0"
+                android:textColorHint="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/addLevelButton"
+            android:layout_width="344dp"
+            android:layout_height="47dp"
+            android:layout_marginTop="28dp"
+            android:backgroundTint="#363636"
+            android:text="Добавить уровень"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.492"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/wordsContainer"
+            app:layout_constraintVertical_bias="0.0" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
