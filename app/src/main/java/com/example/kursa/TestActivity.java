@@ -152,10 +152,10 @@ public class TestActivity extends AppCompatActivity {
                     draggableView.setX(newX);
                     draggableView.setY(newY);
 
-                    if (newX > previousX) {
+                    if (newX > previousX - 350) {
                         rightButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green));
                         leftButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.gray));
-                    } else if (newX < previousX) {
+                    } else if (newX < previousX + 350) {
                         leftButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.red));
                         rightButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.gray));
                     }
@@ -167,6 +167,10 @@ public class TestActivity extends AppCompatActivity {
                             .x(initialX)
                             .y(initialY)
                             .setDuration(200)
+                            .withEndAction(() -> {
+                                leftButton.setBackgroundColor(ContextCompat.getColor(this, R.color.gray));
+                                rightButton.setBackgroundColor(ContextCompat.getColor(this, R.color.gray));
+                            })
                             .start();
                     return true;
             }
@@ -177,8 +181,7 @@ public class TestActivity extends AppCompatActivity {
     private void updateContent() {
         if (unlearnedWords.isEmpty()) {
             contentTextView.setText("Вы изучили все слова!\n");
-            int learnedCount = totalWords - correctAnswers;
-            String progressText = String.format(Locale.getDefault(), "Выучено %d из %d слов", learnedCount, totalWords);
+            String progressText = String.format(Locale.getDefault(), "Выучено %d из %d слов", correctAnswers, totalWords);
             contentTextView.append("\n\n" + progressText);
             Toast.makeText(this, "Обучение завершено", Toast.LENGTH_SHORT).show();
             linearBtm.setVisibility(View.GONE);

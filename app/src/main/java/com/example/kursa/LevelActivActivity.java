@@ -2,9 +2,12 @@ package com.example.kursa;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -145,10 +148,10 @@ public class LevelActivActivity extends AppCompatActivity {
                     draggableView.setX(newX);
                     draggableView.setY(newY);
 
-                    if (newX > previousX) {
+                    if (newX > previousX - 350) {
                         rightButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green));
                         leftButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.gray));
-                    } else if (newX < previousX) {
+                    } else if (newX < previousX + 350) {
                         leftButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.red));
                         rightButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.gray));
                     }
@@ -160,6 +163,10 @@ public class LevelActivActivity extends AppCompatActivity {
                             .x(initialX)
                             .y(initialY)
                             .setDuration(200)
+                            .withEndAction(() -> {
+                                leftButton.setBackgroundColor(ContextCompat.getColor(this, R.color.gray));
+                                rightButton.setBackgroundColor(ContextCompat.getColor(this, R.color.gray));
+                            })
                             .start();
                     return true;
             }
@@ -286,7 +293,7 @@ public class LevelActivActivity extends AppCompatActivity {
                             if (levelName != null && levelName.startsWith(nextLevelName)) {
                                 Map<String, Object> details = (Map<String, Object>) level.get("details");
                                 if (details != null) {
-                                    details.put("isUnlocked", true); // Разблокируем следующий уровень
+                                    details.put("isUnlocked", true);
                                     nextLevelFound = true;
                                     break;
                                 }
@@ -300,7 +307,6 @@ public class LevelActivActivity extends AppCompatActivity {
                                     .addOnSuccessListener(aVoid -> {
                                         Toast.makeText(this, "Следующий уровень разблокирован!", Toast.LENGTH_SHORT).show();
 
-                                        // Возвращаем результат в LevelsFragment
                                         Intent resultIntent = new Intent();
                                         resultIntent.putExtra("LEVEL_UNLOCKED", true);
                                         setResult(RESULT_OK, resultIntent);
@@ -358,10 +364,6 @@ public class LevelActivActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(LevelActivActivity.this, "Слово уже изучено", Toast.LENGTH_SHORT).show();
                     }
-
-                    rightButton.setBackgroundTintList(ContextCompat.getColorStateList(LevelActivActivity.this, R.color.green));
-                    leftButton.setBackgroundTintList(ContextCompat.getColorStateList(LevelActivActivity.this, R.color.gray));
-
                 } else {
                     if (!unlearnedWords.isEmpty()) {
                         Word currentWord = unlearnedWords.get(currentIndex);
@@ -379,9 +381,6 @@ public class LevelActivActivity extends AppCompatActivity {
 
                         updateContent();
                         Toast.makeText(LevelActivActivity.this, "Слово перемещено в конец списка", Toast.LENGTH_SHORT).show();
-
-                        leftButton.setBackgroundTintList(ContextCompat.getColorStateList(LevelActivActivity.this, R.color.red));
-                        rightButton.setBackgroundTintList(ContextCompat.getColorStateList(LevelActivActivity.this, R.color.gray));
                     }
                 }
                 return true;

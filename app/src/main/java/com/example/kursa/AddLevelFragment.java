@@ -74,9 +74,9 @@ public class AddLevelFragment extends Fragment {
     }
 
     private void addLevelToFirestore() {
-        String levelName = levelNameEditText.getText().toString().trim();
+        String userLevelName = levelNameEditText.getText().toString().trim();
 
-        if (levelName.isEmpty()) {
+        if (userLevelName.isEmpty()) {
             levelNameEditText.setError("Введите название уровня");
             return;
         }
@@ -101,8 +101,11 @@ public class AddLevelFragment extends Fragment {
         generateLevelId(new OnLevelIdGeneratedListener() {
             @Override
             public void onLevelIdGenerated(String levelId) {
+                int levelNumber = Integer.parseInt(levelId.replace("level", ""));
+                String levelName = "Уровень " + levelNumber + ": " + userLevelName;
+
                 Map<String, Object> levelDetails = new HashMap<>();
-                levelDetails.put("isUnlocked", true);
+                levelDetails.put("isUnlocked", false);
                 levelDetails.put("words", wordsMap);
 
                 Map<String, Object> level = new HashMap<>();
