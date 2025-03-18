@@ -114,7 +114,7 @@ public class AddLevelFragment extends Fragment {
 
                 db.collection("levelsAll")
                         .document(levelId)
-                        .set(levelDetails)
+                        .set(level)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {

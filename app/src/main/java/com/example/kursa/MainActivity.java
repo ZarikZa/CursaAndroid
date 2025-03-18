@@ -2,22 +2,13 @@ package com.example.kursa;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,13 +29,14 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        // Запуск фоновой задачи
+        WorkManagerHelper.scheduleDailyTask(this);
+
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
         db = FirebaseFirestore.getInstance();
         enter = findViewById(R.id.loginButton);
-        enter.setOnClickListener(v -> {
-            onLoginButtonClick();
-        });
+        enter.setOnClickListener(v -> onLoginButtonClick());
 
         regist = findViewById(R.id.registerButton);
         regist.setOnClickListener(v -> {
@@ -53,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         forgotPass = findViewById(R.id.forgotPassword);
-        forgotPass.setOnClickListener(v ->{
+        forgotPass.setOnClickListener(v -> {
             Intent intent = new Intent(this, ChangePasswordActivity.class);
             startActivity(intent);
         });
@@ -79,19 +71,17 @@ public class MainActivity extends AppCompatActivity {
                             DocumentSnapshot userDoc = querySnapshot.getDocuments().get(0);
                             String nickname = userDoc.getString("nickname");
                             String role = userDoc.getString("role");
-                            if(Objects.equals(role, "user")){
+                            if (Objects.equals(role, "user")) {
                                 Intent intent = new Intent(MainActivity.this, NavigationActivity.class);
                                 intent.putExtra("USER_NICKNAME", nickname);
                                 startActivity(intent);
                                 finish();
-                            }
-                            else {
+                            } else {
                                 Intent intent = new Intent(MainActivity.this, NavigationAdminActivity.class);
                                 intent.putExtra("USER_NICKNAME", nickname);
                                 startActivity(intent);
                                 finish();
                             }
-
                         } else {
                             Toast.makeText(MainActivity.this, "Неверный логин или пароль", Toast.LENGTH_SHORT).show();
                         }

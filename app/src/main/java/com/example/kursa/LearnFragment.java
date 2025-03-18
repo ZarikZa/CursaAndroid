@@ -143,21 +143,20 @@ public class LearnFragment extends Fragment {
     }
     private void loadDailyWordsFromFirebase(OnWordsLoadedListener listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("dailyWords")
-                .limit(1)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
 
+        db.collection("dailyWords")
+                .document("current")
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
                         List<Map<String, Object>> wordsArray = (List<Map<String, Object>>) documentSnapshot.get("words");
 
                         if (wordsArray != null && !wordsArray.isEmpty()) {
-                            wordList.clear(); // Очищаем текущий список слов
+                            wordList.clear();
 
                             for (Map<String, Object> wordMap : wordsArray) {
-                                String englishWord = (String) wordMap.get("word"); // Получаем английское слово
-                                String translation = (String) wordMap.get("definition"); // Получаем перевод
+                                String englishWord = (String) wordMap.get("word");
+                                String translation = (String) wordMap.get("definition");
 
                                 wordList.add(new Word(englishWord, translation));
                             }
@@ -168,7 +167,7 @@ public class LearnFragment extends Fragment {
                             listener.onWordsLoaded(false);
                         }
                     } else {
-                        Toast.makeText(requireActivity(), "Документ dailyWords не найден", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireActivity(), "Документ current не найден", Toast.LENGTH_SHORT).show();
                         listener.onWordsLoaded(false);
                     }
                 })

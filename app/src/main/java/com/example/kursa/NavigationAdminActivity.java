@@ -32,6 +32,9 @@ public class NavigationAdminActivity extends AppCompatActivity {
                 } else if (item.getItemId() == R.id.nav_profile) {
                     setFragment(new ProfileAdminFragment());
                     return true;
+                }else if (item.getItemId() == R.id.nav_update) {
+                    setFragment(new UpdateDailyFragment());
+                    return true;
                 }
                 return false;
             }

@@ -1,6 +1,5 @@
 package com.example.kursa;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,16 +18,20 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Random;
+
 public class ChangePasswordActivity extends AppCompatActivity {
-    private EditText usernameEditText;
+    private EditText emailEditText;
+    private EditText verificationCodeEditText;
     private EditText newPasswordEditText;
     private EditText confirmNewPasswordEditText;
-    private Button loginButton, changePasswordButton;
+    private Button sendCodeButton, verifyCodeButton, changePasswordButton;
     private ImageButton backButton;
     private TextView loginTitle;
 
     private FirebaseFirestore db;
     private String userId;
+    private String verificationCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,68 +40,102 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        usernameEditText = findViewById(R.id.username);
+        emailEditText = findViewById(R.id.email);
+        verificationCodeEditText = findViewById(R.id.verificationCode);
         newPasswordEditText = findViewById(R.id.newPassword);
         confirmNewPasswordEditText = findViewById(R.id.confirmNewPassword);
-        loginButton = findViewById(R.id.loginButton);
+        sendCodeButton = findViewById(R.id.sendCodeButton);
+        verifyCodeButton = findViewById(R.id.verifyCodeButton);
         changePasswordButton = findViewById(R.id.changePasswordButton);
         loginTitle = findViewById(R.id.loginTitle);
 
+        verificationCodeEditText.setVisibility(View.GONE);
+        verifyCodeButton.setVisibility(View.GONE);
         newPasswordEditText.setVisibility(View.GONE);
         confirmNewPasswordEditText.setVisibility(View.GONE);
         changePasswordButton.setVisibility(View.GONE);
 
         backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(v ->{
-            finish();
-        });
+        backButton.setOnClickListener(v -> finish());
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        sendCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String enteredUsername = usernameEditText.getText().toString();
+                String enteredEmail = emailEditText.getText().toString();
 
-                if (enteredUsername.isEmpty()) {
-                    usernameEditText.setError("Введите логин");
+                if (enteredEmail.isEmpty()) {
+                    emailEditText.setError("Введите email");
                     return;
                 }
 
+                // Поиск пользователя по email в Firestore
                 db.collection("users")
-                        .whereEqualTo("login", enteredUsername)
+                        .whereEqualTo("email", enteredEmail)
                         .get()
                         .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                             @Override
                             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                                 if (!queryDocumentSnapshots.isEmpty()) {
                                     DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
-                                    String firestoreLogin = document.getString("login");
+                                    String firestoreEmail = document.getString("email");
 
-                                    if (firestoreLogin != null && firestoreLogin.equals(enteredUsername)) {
+                                    if (firestoreEmail != null && firestoreEmail.equals(enteredEmail)) {
                                         userId = document.getId();
 
-                                        usernameEditText.setVisibility(View.GONE);
-                                        loginButton.setVisibility(View.GONE);
+                                        verificationCode = generateVerificationCode();
 
-                                        newPasswordEditText.setVisibility(View.VISIBLE);
-                                        confirmNewPasswordEditText.setVisibility(View.VISIBLE);
-                                        changePasswordButton.setVisibility(View.VISIBLE);
+                                        String senderEmail = "ovetalingoveta@gmail.com";
+                                        String senderPassword = "wzmc djkk phpx kswu";
+                                        String subject = "Код подтверждения";
+                                        String body = "Ваш код подтверждения: " + verificationCode;
 
-                                        loginTitle.setText("Смена пароля");
+                                        new SendMailTask(senderEmail, senderPassword, enteredEmail, subject, body).execute();
+
+                                        emailEditText.setVisibility(View.GONE);
+                                        sendCodeButton.setVisibility(View.GONE);
+                                        verificationCodeEditText.setVisibility(View.VISIBLE);
+                                        verifyCodeButton.setVisibility(View.VISIBLE);
+
+                                        Toast.makeText(ChangePasswordActivity.this, "Код отправлен на ваш email", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        usernameEditText.setError("Неверный логин");
+                                        emailEditText.setError("Неверный email");
                                     }
                                 } else {
-                                    usernameEditText.setError("Пользователь не найден");
+                                    emailEditText.setError("Пользователь не найден");
                                 }
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(ChangePasswordActivity.this, "Ошибка при проверке логина", Toast.LENGTH_SHORT).show();
-                                Log.e("Firestore", "Ошибка при проверке логина", e);
+                                Toast.makeText(ChangePasswordActivity.this, "Ошибка при проверке email", Toast.LENGTH_SHORT).show();
+                                Log.e("Firestore", "Ошибка при проверке email", e);
                             }
                         });
+            }
+        });
+
+        verifyCodeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String enteredCode = verificationCodeEditText.getText().toString();
+
+                if (enteredCode.isEmpty()) {
+                    verificationCodeEditText.setError("Введите код");
+                    return;
+                }
+
+                if (enteredCode.equals(verificationCode)) {
+                    verificationCodeEditText.setVisibility(View.GONE);
+                    verifyCodeButton.setVisibility(View.GONE);
+                    newPasswordEditText.setVisibility(View.VISIBLE);
+                    confirmNewPasswordEditText.setVisibility(View.VISIBLE);
+                    changePasswordButton.setVisibility(View.VISIBLE);
+
+                    Toast.makeText(ChangePasswordActivity.this, "Код подтвержден", Toast.LENGTH_SHORT).show();
+                } else {
+                    verificationCodeEditText.setError("Неверный код");
+                }
             }
         });
 
@@ -112,7 +149,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                     Toast.makeText(ChangePasswordActivity.this, "Заполните все поля", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (!isPasswordValid(newPassword)){
+                if (!isPasswordValid(newPassword)) {
                     return;
                 }
 
@@ -124,7 +161,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Toast.makeText(ChangePasswordActivity.this, "Пароль успешно изменен", Toast.LENGTH_SHORT).show();
-
                                     finish();
                                 }
                             })
@@ -160,5 +196,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000);
+        return String.valueOf(code);
     }
 }
