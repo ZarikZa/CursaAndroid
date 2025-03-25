@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "392279214252",
-    "project_id": "ovetaling",
-    "storage_bucket": "ovetaling.firebasestorage.app"
+    "project_number": "700311481802",
+    "project_id": "ovetaling2",
+    "storage_bucket": "ovetaling2.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:392279214252:android:6a91921cf3d1fc27c3b709",
+        "mobilesdk_app_id": "1:700311481802:android:5183e20ef80f4e7ea9f333",
         "android_client_info": {
           "package_name": "com.example.kursa"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA7ZGSfcp8osZ1--Nog0toS0HINueCyOdA"
+          "current_key": "AIzaSyBn7GzIU9na6T5Phodg2HvcafIkzgCGXUM"
         }
       ],
       "services": {
