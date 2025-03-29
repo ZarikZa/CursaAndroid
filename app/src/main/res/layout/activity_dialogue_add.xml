@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1c1c1c"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Waiter Dialogue"
+            android:textColor="#E0E0E0"
+            android:textSize="24sp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <EditText
+            android:id="@+id/dialogueIdEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Dialogue ID (e.g., waiter_cafe)"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/characterEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Character (e.g., Waiter)"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Фраза 1 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phrase 1"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <EditText
+            android:id="@+id/phrase1TextEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phrase text"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase1Option1EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 1 (correct)"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase1Option2EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 2"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase1Option3EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 3"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Фраза 2 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phrase 2"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <EditText
+            android:id="@+id/phrase2TextEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phrase text"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase2Option1EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 1 (correct)"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase2Option2EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 2"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase2Option3EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 3"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Фраза 3 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phrase 3"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <EditText
+            android:id="@+id/phrase3TextEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phrase text"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase3Option1EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 1 (correct)"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase3Option2EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 2"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase3Option3EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 3"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Фраза 4 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phrase 4"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <EditText
+            android:id="@+id/phrase4TextEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phrase text"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase4Option1EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 1 (correct)"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase4Option2EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 2"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase4Option3EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 3"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Фраза 5 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phrase 5"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <EditText
+            android:id="@+id/phrase5TextEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phrase text"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase5Option1EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 1 (correct)"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase5Option2EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 2"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0" />
+        <EditText
+            android:id="@+id/phrase5Option3EditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Option 3"
+            android:textColor="#E0E0E0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Dialogue"
+            android:backgroundTint="#363636"
+            android:textColor="#E0E0E0"
+            android:textSize="16sp" />
+    </LinearLayout>
+</ScrollView>
