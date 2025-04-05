@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:text="Level"
         android:enabled="true"
+        android:textColorHint="#363636"
         android:clickable="true"
         android:focusable="true" />
 </LinearLayout>

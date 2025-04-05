@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,11 +15,13 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
 public class LearnFragment extends Fragment {
 
     private TextView tvTimeRemaining;
@@ -28,6 +31,7 @@ public class LearnFragment extends Fragment {
     private List<Word> wordList;
     private Button VseSlovaBtm;
     private Button EzednevIspitBtm;
+    private LinearLayout levelsContainer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +47,9 @@ public class LearnFragment extends Fragment {
         tvTimeRemaining = view.findViewById(R.id.tvTimeRemaining);
         startDailyChallengeTimer();
         wordList = new ArrayList<>();
+
+        levelsContainer = view.findViewById(R.id.levelsContainer);
+
         TenSlovBtm = view.findViewById(R.id.tenslovtest);
         TenSlovBtm.setOnClickListener(v -> {
             loadWordsFromFirebase(new OnWordsLoadedListener() {
@@ -65,8 +72,9 @@ public class LearnFragment extends Fragment {
                 }
             });
         });
+
         VseSlovaBtm = view.findViewById(R.id.vseSlovaBtm);
-        VseSlovaBtm.setOnClickListener(v ->{
+        VseSlovaBtm.setOnClickListener(v -> {
             loadWordsFromFirebase(new OnWordsLoadedListener() {
                 @Override
                 public void onWordsLoaded(boolean isSuccess) {
@@ -82,13 +90,14 @@ public class LearnFragment extends Fragment {
                 }
             });
         });
+
         EzednevIspitBtm = view.findViewById(R.id.ezednevIspitBtm);
-        EzednevIspitBtm.setOnClickListener(v ->{
+        EzednevIspitBtm.setOnClickListener(v -> {
             loadDailyWordsFromFirebase(new OnWordsLoadedListener() {
                 @Override
                 public void onWordsLoaded(boolean isSuccess) {
                     if (isSuccess) {
-                        Level level = new Level("Тест на все слова", wordList, true);
+                        Level level = new Level("Ежедневный тест", wordList, true);
                         Intent intent = new Intent(getContext(), TestActivity.class);
                         intent.putExtra("level", level);
                         intent.putExtra("nickname", userNickname);
@@ -99,7 +108,58 @@ public class LearnFragment extends Fragment {
                 }
             });
         });
+
+        // Загрузка уровней
+        loadLevels();
+
         return view;
+    }
+
+    private void loadLevels() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("sentenceLevels")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        String levelId = document.getId();
+
+                        // Создаём кнопку для уровня
+                        Button levelButton = new Button(getContext());
+                        levelButton.setText("Уровень: " + levelId);
+                        levelButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#292828")));
+                        levelButton.setTextColor(android.graphics.Color.parseColor("#A9A9A9"));
+                        levelButton.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        params.setMargins(0, 0, 0, 8);
+                        levelButton.setLayoutParams(params);
+
+                        // Обработчик нажатия на кнопку уровня
+                        levelButton.setOnClickListener(v -> {
+                            Intent intent = new Intent(getContext(), SentenceBuilderActivity.class);
+                            intent.putExtra("levelId", levelId);
+                            intent.putExtra("nickname", userNickname);
+                            startActivity(intent);
+                        });
+
+                        // Добавляем разделитель перед кнопкой (кроме первой)
+                        if (levelsContainer.getChildCount() > 1) {
+                            View divider = new View(getContext());
+                            divider.setLayoutParams(new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    1));
+                            divider.setBackgroundColor(android.graphics.Color.parseColor("#A9A9A9"));
+                            levelsContainer.addView(divider);
+                        }
+
+                        levelsContainer.addView(levelButton);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Ошибка загрузки уровней: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private List<Word> getLastTenWords(List<Word> wordList) {
@@ -108,8 +168,7 @@ public class LearnFragment extends Fragment {
             return wordList;
         }
         int startIndex = wordList.size() - 10;
-        List<Word> lastTenWords = new ArrayList<>(wordList.subList(startIndex, wordList.size()));
-        return lastTenWords;
+        return new ArrayList<>(wordList.subList(startIndex, wordList.size()));
     }
 
     private void loadWordsFromFirebase(OnWordsLoadedListener listener) {
@@ -118,13 +177,19 @@ public class LearnFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        Map<String, String> wordsMap = (Map<String, String>) documentSnapshot.get("words");
+                        Map<String, Object> wordsMap = (Map<String, Object>) documentSnapshot.get("words");
                         if (wordsMap != null && !wordsMap.isEmpty()) {
                             wordList.clear();
-                            for (Map.Entry<String, String> entry : wordsMap.entrySet()) {
+                            for (Map.Entry<String, Object> entry : wordsMap.entrySet()) {
                                 String englishWord = entry.getKey();
-                                String translation = entry.getValue();
-                                wordList.add(new Word(englishWord, translation));
+                                if (entry.getValue() instanceof Map) {
+                                    Map<String, Object> wordData = (Map<String, Object>) entry.getValue();
+                                    String translation = (String) wordData.get("translation");
+                                    wordList.add(new Word(englishWord, translation));
+                                } else if (entry.getValue() instanceof String) {
+                                    String translation = (String) entry.getValue();
+                                    wordList.add(new Word(englishWord, translation));
+                                }
                             }
                             listener.onWordsLoaded(true);
                         } else {
@@ -141,26 +206,22 @@ public class LearnFragment extends Fragment {
                     listener.onWordsLoaded(false);
                 });
     }
+
     private void loadDailyWordsFromFirebase(OnWordsLoadedListener listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         db.collection("dailyWords")
                 .document("current")
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         List<Map<String, Object>> wordsArray = (List<Map<String, Object>>) documentSnapshot.get("words");
-
                         if (wordsArray != null && !wordsArray.isEmpty()) {
                             wordList.clear();
-
                             for (Map<String, Object> wordMap : wordsArray) {
-                                String englishWord = (String) wordMap.get("word");
-                                String translation = (String) wordMap.get("definition");
-
+                                String englishWord = (String) wordMap.get("english");
+                                String translation = (String) wordMap.get("translation");
                                 wordList.add(new Word(englishWord, translation));
                             }
-
                             listener.onWordsLoaded(true);
                         } else {
                             Toast.makeText(requireActivity(), "Словарь пуст", Toast.LENGTH_SHORT).show();
@@ -204,6 +265,14 @@ public class LearnFragment extends Fragment {
             }
         };
         countDownTimer.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 
     public interface OnWordsLoadedListener {

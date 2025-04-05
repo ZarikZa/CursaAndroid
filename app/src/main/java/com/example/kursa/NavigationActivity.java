@@ -33,7 +33,7 @@ public class NavigationActivity extends AppCompatActivity {
                     setFragment(new LevelsFragment());
                     return true;
                 } else if (item.getItemId() == R.id.nav_dictionary) {
-                    setFragment(new SlovarFragment());
+                    setFragment(new DialogueSelectionFragment());
                     return true;
                 } else if (item.getItemId() == R.id.nav_ranking) {
                     setFragment(new ReytingFragment());

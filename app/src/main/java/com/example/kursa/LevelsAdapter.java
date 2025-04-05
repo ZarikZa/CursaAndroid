@@ -53,8 +53,10 @@ public class LevelsAdapter extends RecyclerView.Adapter<LevelsAdapter.LevelViewH
             levelButton.setEnabled(level.isUnlocked());
             if (level.isUnlocked()) {
                 levelButton.setBackgroundTintList(itemView.getContext().getResources().getColorStateList(R.color.unlocked_level_color));
+                levelButton.setTextColor(itemView.getContext().getResources().getColorStateList(R.color.selected_text_color));
             } else {
                 levelButton.setBackgroundTintList(itemView.getContext().getResources().getColorStateList(R.color.locked_level_color));
+                levelButton.setTextColor(itemView.getContext().getResources().getColorStateList(R.color.selected_text_color));
             }
 
             levelButton.setOnClickListener(v -> {

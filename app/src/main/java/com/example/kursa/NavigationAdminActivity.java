@@ -22,18 +22,24 @@ public class NavigationAdminActivity extends AppCompatActivity {
         nickname = intent.getStringExtra("USER_NICKNAME");
 
         botton = findViewById(R.id.bottomNavigationViewAdmin);
-        setFragment(new AddLevelFragment());
+        setFragment(new LevelMainListFragment());
         botton.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.nav_levels) {
-                    setFragment(new AddLevelFragment());
+                    setFragment(new LevelMainListFragment());
                     return true;
                 } else if (item.getItemId() == R.id.nav_profile) {
                     setFragment(new ProfileAdminFragment());
                     return true;
                 }else if (item.getItemId() == R.id.nav_update) {
                     setFragment(new UpdateDailyFragment());
+                    return true;
+                }else if (item.getItemId() == R.id.nav_dialoge) {
+                    setFragment(new DialogueListFragment());
+                    return true;
+                }else if (item.getItemId() == R.id.nav_predloj) {
+                    setFragment(new LevelListFragment());
                     return true;
                 }
                 return false;

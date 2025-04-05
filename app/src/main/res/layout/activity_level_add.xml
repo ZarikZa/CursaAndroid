@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1c1c1c"
@@ -10,152 +11,221 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add New Level (5 Sentences)"
-            android:textColor="#E0E0E0"
-            android:textSize="24sp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="16dp" />
-
-        <EditText
-            android:id="@+id/levelIdEditText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Level ID (e.g., level_1)"
-            android:textColor="#E0E0E0"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Назад"
+                android:src="@drawable/back50" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Добавить новый уровень (5 предложений)"
+                android:textColor="#E0E0E0"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="ID уровня (например: level_1)"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/levelIdEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Предложение 1 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sentence 1"
+            android:text="Предложение 1"
             android:textColor="#E0E0E0"
             android:textSize="18sp" />
-        <EditText
-            android:id="@+id/russian1EditText"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Russian sentence"
-            android:textColor="#E0E0E0"
+            android:hint="Русское предложение"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="8dp" />
-        <EditText
-            android:id="@+id/english1EditText"
+            android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/russian1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="English translation"
-            android:textColor="#E0E0E0"
+            android:hint="Английский перевод"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/english1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Предложение 2 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sentence 2"
+            android:text="Предложение 2"
             android:textColor="#E0E0E0"
             android:textSize="18sp" />
-        <EditText
-            android:id="@+id/russian2EditText"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Russian sentence"
-            android:textColor="#E0E0E0"
+            android:hint="Русское предложение"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="8dp" />
-        <EditText
-            android:id="@+id/english2EditText"
+            android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/russian2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="English translation"
-            android:textColor="#E0E0E0"
+            android:hint="Английский перевод"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/english2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Предложение 3 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sentence 3"
+            android:text="Предложение 3"
             android:textColor="#E0E0E0"
             android:textSize="18sp" />
-        <EditText
-            android:id="@+id/russian3EditText"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Russian sentence"
-            android:textColor="#E0E0E0"
+            android:hint="Русское предложение"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="8dp" />
-        <EditText
-            android:id="@+id/english3EditText"
+            android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/russian3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="English translation"
-            android:textColor="#E0E0E0"
+            android:hint="Английский перевод"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/english3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Предложение 4 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sentence 4"
+            android:text="Предложение 4"
             android:textColor="#E0E0E0"
             android:textSize="18sp" />
-        <EditText
-            android:id="@+id/russian4EditText"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Russian sentence"
-            android:textColor="#E0E0E0"
+            android:hint="Русское предложение"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="8dp" />
-        <EditText
-            android:id="@+id/english4EditText"
+            android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/russian4EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="English translation"
-            android:textColor="#E0E0E0"
+            android:hint="Английский перевод"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/english4EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Предложение 5 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sentence 5"
+            android:text="Предложение 5"
             android:textColor="#E0E0E0"
             android:textSize="18sp" />
-        <EditText
-            android:id="@+id/russian5EditText"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Russian sentence"
-            android:textColor="#E0E0E0"
+            android:hint="Русское предложение"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/english5EditText"
+            android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/russian5EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="English translation"
-            android:textColor="#E0E0E0"
+            android:hint="Английский перевод"
+            app:hintTextColor="#A0A0A0"
             android:textColorHint="#A0A0A0"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/english5EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/saveButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Level"
-            android:backgroundTint="#363636"
-            android:textColor="#E0E0E0"
+            android:text="Добавить уровень"
+            android:backgroundTint="#e8def8"
+            android:textColor="@color/black"
             android:textSize="16sp" />
     </LinearLayout>
 </ScrollView>

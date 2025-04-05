@@ -1,6 +1,8 @@
 package com.example.kursa;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -41,8 +44,7 @@ public class ProfileAdminFragment extends Fragment {
         }
 
         logoutButton.setOnClickListener(v ->{
-            Intent intent = new Intent(getActivity(), MainActivity.class);
-            startActivity(intent);
+            showLogoutConfirmationDialog();
         });
 
         changePasswordButton.setOnClickListener(v -> {
@@ -52,6 +54,27 @@ public class ProfileAdminFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void showLogoutConfirmationDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Подтверждение выхода")
+                .setMessage("Вы уверены, что хотите выйти из аккаунта?")
+                .setPositiveButton("Да", (dialog, which) -> performLogout())
+                .setNegativeButton("Отмена", null)
+                .show();
+    }
+
+    private void performLogout() {
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        requireActivity().finish();
     }
 
     private void fetchUserData(String nickname) {

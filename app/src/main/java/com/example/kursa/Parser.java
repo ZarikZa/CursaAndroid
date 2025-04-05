@@ -29,7 +29,7 @@ public class Parser {
             if (columns.size() >= 4) {
                 String word = columns.get(1).text().trim();
                 String definition = columns.get(3).text().trim();
-                words.add(new Word(word, definition));
+                    words.add(new Word(word, definition));
             }
         }
 

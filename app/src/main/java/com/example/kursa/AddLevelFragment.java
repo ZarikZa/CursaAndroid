@@ -6,34 +6,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class AddLevelFragment extends Fragment {
 
-    private EditText levelNameEditText;
-    private EditText[] englishWords = new EditText[10];
-    private EditText[] translations = new EditText[10];
+    private TextInputEditText levelNameEditText;
+    private TextInputEditText[] englishWords = new TextInputEditText[10];
+    private TextInputEditText[] translations = new TextInputEditText[10];
     private Button addLevelButton;
-
     private FirebaseFirestore db;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.frame_add_level, container, false);
+        View view = inflater.inflate(R.layout.activity_level_main_add, container, false);
 
         db = FirebaseFirestore.getInstance();
 
@@ -63,12 +57,7 @@ public class AddLevelFragment extends Fragment {
 
         addLevelButton = view.findViewById(R.id.addLevelButton);
 
-        addLevelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addLevelToFirestore();
-            }
-        });
+        addLevelButton.setOnClickListener(v -> addLevelToFirestore());
 
         return view;
     }
@@ -76,67 +65,82 @@ public class AddLevelFragment extends Fragment {
     private void addLevelToFirestore() {
         String userLevelName = levelNameEditText.getText().toString().trim();
 
+        // Проверка на пустое название уровня
         if (userLevelName.isEmpty()) {
             levelNameEditText.setError("Введите название уровня");
             return;
         }
 
-        Map<String, String> wordsMap = new HashMap<>();
+        String[] englishWordStrings = new String[10];
+        String[] translationStrings = new String[10];
 
+        // Сбор данных из полей
         for (int i = 0; i < 10; i++) {
-            String englishWord = englishWords[i].getText().toString().trim();
-            String translation = translations[i].getText().toString().trim();
+            englishWordStrings[i] = englishWords[i].getText().toString().trim();
+            translationStrings[i] = translations[i].getText().toString().trim();
+        }
 
-            if (englishWord.isEmpty() || translation.isEmpty()) {
+        // Проверка на пустые поля
+        for (int i = 0; i < 10; i++) {
+            if (englishWordStrings[i].isEmpty() || translationStrings[i].isEmpty()) {
                 Toast.makeText(getContext(), "Заполните все поля слов и переводов", Toast.LENGTH_SHORT).show();
                 return;
             }
+        }
 
-            wordsMap.put(englishWord, translation);
-            Log.d("Firestore", "Добавлено слово: " + englishWord + " -> " + translation);
+        // Проверка английских слов (только английские символы)
+        for (int i = 0; i < 10; i++) {
+            if (!englishWordStrings[i].matches("^[a-zA-Z\\s.,!?'-]+$")) {
+                Toast.makeText(getContext(), "Word " + (i + 1) + " (English) must contain only English characters", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        // Проверка переводов (только русские символы)
+        for (int i = 0; i < 10; i++) {
+            if (!translationStrings[i].matches("^[а-яА-ЯёЁ\\s.,!?'-]+$")) {
+                Toast.makeText(getContext(), "Translation " + (i + 1) + " (Russian) must contain only Russian characters", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        // Формирование данных
+        Map<String, String> wordsMap = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            wordsMap.put(englishWordStrings[i], translationStrings[i]);
+            Log.d("Firestore", "Добавлено слово: " + englishWordStrings[i] + " -> " + translationStrings[i]);
         }
 
         Log.d("Firestore", "Всего добавлено слов: " + wordsMap.size());
 
-        generateLevelId(new OnLevelIdGeneratedListener() {
-            @Override
-            public void onLevelIdGenerated(String levelId) {
-                int levelNumber = Integer.parseInt(levelId.replace("level", ""));
-                String levelName = "Уровень " + levelNumber + ": " + userLevelName;
+        generateLevelId(levelId -> {
+            int levelNumber = Integer.parseInt(levelId.replace("level", ""));
+            String levelName = "Уровень " + levelNumber + ": " + userLevelName;
 
-                Map<String, Object> levelDetails = new HashMap<>();
-                levelDetails.put("isUnlocked", false);
-                levelDetails.put("words", wordsMap);
+            Map<String, Object> levelDetails = new HashMap<>();
+            levelDetails.put("isUnlocked", levelNumber == 1);
+            levelDetails.put("words", wordsMap);
+            Map<String, Object> level = new HashMap<>();
+            level.put("details", levelDetails);
+            level.put("levelName", levelName);
 
-                Map<String, Object> level = new HashMap<>();
-                level.put("details", levelDetails);
-                level.put("levelName", levelName);
-
-                db.collection("levelsAll")
-                        .document(levelId)
-                        .set(level)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(getContext(), "Уровень успешно добавлен", Toast.LENGTH_SHORT).show();
-                                resetFields();
-                                bindLevelToUsers(level);
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getContext(), "Ошибка при добавлении уровня", Toast.LENGTH_SHORT).show();
-                                Log.e("Firestore", "Ошибка: ", e);
-                            }
-                        });
-            }
+            db.collection("levelsAll")
+                    .document(levelId)
+                    .set(level)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Уровень успешно добавлен", Toast.LENGTH_SHORT).show();
+                        resetFields();
+                        bindLevelToUsers(level);
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Ошибка при добавлении уровня", Toast.LENGTH_SHORT).show();
+                        Log.e("Firestore", "Ошибка: ", e);
+                    });
         });
     }
 
     private void resetFields() {
         levelNameEditText.setText("");
-
         for (int i = 0; i < 10; i++) {
             englishWords[i].setText("");
             translations[i].setText("");
@@ -146,86 +150,60 @@ public class AddLevelFragment extends Fragment {
     private void generateLevelId(OnLevelIdGeneratedListener listener) {
         db.collection("levelsAll")
                 .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        int levelCount = queryDocumentSnapshots.size();
-
-                        String levelId = "level" + (levelCount + 1);
-
-                        listener.onLevelIdGenerated(levelId);
-                    }
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    int levelCount = queryDocumentSnapshots.size();
+                    String levelId = "level" + (levelCount + 1);
+                    listener.onLevelIdGenerated(levelId);
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e("Firestore", "Ошибка при получении количества уровней", e);
-                        listener.onLevelIdGenerated("level1");
-                    }
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Ошибка при получении количества уровней", e);
+                    listener.onLevelIdGenerated("level1");
                 });
     }
 
     private void bindLevelToUsers(Map<String, Object> level) {
         db.collection("users")
                 .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        for (DocumentSnapshot document : queryDocumentSnapshots) {
-                            String nickname = document.getString("nickname");
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+                        String nickname = document.getString("nickname");
 
-                            if (nickname != null && !nickname.isEmpty()) {
-                                db.collection("levels")
-                                        .document(nickname)
-                                        .update("levels", FieldValue.arrayUnion(level))
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d("Firestore", "Уровень добавлен пользователю: " + nickname);
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                if (e.getMessage() != null && e.getMessage().contains("No document to update")) {
-                                                    Map<String, Object> userLevels = new HashMap<>();
-                                                    userLevels.put("levels", FieldValue.arrayUnion(level));
+                        if (nickname != null && !nickname.isEmpty()) {
+                            db.collection("levels")
+                                    .document(nickname)
+                                    .update("levels", FieldValue.arrayUnion(level))
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("Firestore", "Уровень добавлен пользователю: " + nickname);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        if (e.getMessage() != null && e.getMessage().contains("No document to update")) {
+                                            Map<String, Object> userLevels = new HashMap<>();
+                                            userLevels.put("levels", FieldValue.arrayUnion(level));
 
-                                                    db.collection("levels")
-                                                            .document(nickname)
-                                                            .set(userLevels)
-                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                @Override
-                                                                public void onSuccess(Void aVoid) {
-                                                                    Log.d("Firestore", "Документ создан и уровень добавлен пользователю: " + nickname);
-                                                                }
-                                                            })
-                                                            .addOnFailureListener(new OnFailureListener() {
-                                                                @Override
-                                                                public void onFailure(@NonNull Exception e) {
-                                                                    Log.e("Firestore", "Ошибка при создании документа: " + nickname, e);
-                                                                }
-                                                            });
-                                                } else {
-                                                    Log.e("Firestore", "Ошибка при добавлении уровня пользователю: " + nickname, e);
-                                                }
-                                            }
-                                        });
-                            } else {
-                                Log.e("Firestore", "Никнейм пользователя пустой или null");
-                            }
+                                            db.collection("levels")
+                                                    .document(nickname)
+                                                    .set(userLevels)
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        Log.d("Firestore", "Документ создан и уровень добавлен пользователю: " + nickname);
+                                                    })
+                                                    .addOnFailureListener(e2 -> {
+                                                        Log.e("Firestore", "Ошибка при создании документа: " + nickname, e2);
+                                                    });
+                                        } else {
+                                            Log.e("Firestore", "Ошибка при добавлении уровня пользователю: " + nickname, e);
+                                        }
+                                    });
+                        } else {
+                            Log.e("Firestore", "Никнейм пользователя пустой или null");
                         }
+                    }
 
-                        Toast.makeText(getContext(), "Уровень привязан ко всем пользователям", Toast.LENGTH_SHORT).show();
-                        getParentFragmentManager().popBackStack();
-                    }
+                    Toast.makeText(getContext(), "Уровень привязан ко всем пользователям", Toast.LENGTH_SHORT).show();
+                    getParentFragmentManager().popBackStack();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getContext(), "Ошибка при привязке уровня", Toast.LENGTH_SHORT).show();
-                        Log.e("Firestore", "Ошибка при получении пользователей", e);
-                    }
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Ошибка при привязке уровня", Toast.LENGTH_SHORT).show();
+                    Log.e("Firestore", "Ошибка при получении пользователей", e);
                 });
     }
 

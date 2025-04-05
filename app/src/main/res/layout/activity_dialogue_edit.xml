@@ -1,6 +1,370 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1c1c1c"
+    android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Назад"
+                android:src="@drawable/back50" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Редактирование диалога"
+                android:textColor="#E0E0E0"
+                android:textSize="24sp" />
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="ID диалога (напр. waiter_cafe)"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/dialogueIdEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Персонаж (напр. Официант)"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/characterEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Фраза 1 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Фраза 1"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Текст фразы"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase1TextEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 1 (правильный)"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase1Option1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 2"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase1Option2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 3"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase1Option3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Фраза 2 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Фраза 2"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Текст фразы"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase2TextEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 1 (правильный)"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase2Option1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 2"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase2Option2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 3"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase2Option3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Фраза 3 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Фраза 3"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Текст фразы"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase3TextEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 1 (правильный)"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase3Option1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 2"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase3Option2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 3"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase3Option3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Фраза 4 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Фраза 4"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Текст фразы"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase4TextEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 1 (правильный)"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase4Option1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 2"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase4Option2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 3"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase4Option3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Фраза 5 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Фраза 5"
+            android:textColor="#E0E0E0"
+            android:textSize="18sp" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Текст фразы"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase5TextEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 1 (правильный)"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase5Option1EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 2"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase5Option2EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Вариант 3"
+            app:hintTextColor="#A0A0A0"
+            android:textColorHint="#A0A0A0"
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/phrase5Option3EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#E0E0E0" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Сохранить диалог"
+            android:backgroundTint="#363636"
+            android:textColor="#E0E0E0"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Удалить диалог"
+            android:backgroundTint="#FF4444"
+            android:textColor="#E0E0E0"
+            android:textSize="16sp" />
+    </LinearLayout>
+</ScrollView>

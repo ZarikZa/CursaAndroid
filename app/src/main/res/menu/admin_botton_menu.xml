@@ -10,8 +10,18 @@
         android:icon="@drawable/day48"
         android:title="" />
     <item
+        android:id="@+id/nav_dialoge"
+        android:icon="@drawable/chat48"
+        android:title="" />
+    <item
+        android:id="@+id/nav_predloj"
+        android:icon="@drawable/predloj48"
+        android:title="" />
+
+    <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/profile48"
         android:title="" />
+
 
 </menu>

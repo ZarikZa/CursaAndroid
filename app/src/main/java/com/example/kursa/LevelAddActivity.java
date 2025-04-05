@@ -1,13 +1,11 @@
 package com.example.kursa;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,14 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class SentenceBuilderAdminFragment extends Fragment {
+public class LevelAddActivity extends AppCompatActivity {
 
-    private EditText levelIdEditText;
-    private EditText russian1EditText, english1EditText;
-    private EditText russian2EditText, english2EditText;
-    private EditText russian3EditText, english3EditText;
-    private EditText russian4EditText, english4EditText;
-    private EditText russian5EditText, english5EditText;
+    private TextInputEditText levelIdEditText;
+    private TextInputEditText russian1EditText, english1EditText;
+    private TextInputEditText russian2EditText, english2EditText;
+    private TextInputEditText russian3EditText, english3EditText;
+    private TextInputEditText russian4EditText, english4EditText;
+    private TextInputEditText russian5EditText, english5EditText;
     private Button saveButton;
     private FirebaseFirestore db;
 
@@ -34,27 +32,28 @@ public class SentenceBuilderAdminFragment extends Fragment {
     );
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_sentence_builder_admin, container, false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_level_add);
 
         // Инициализация элементов
-        levelIdEditText = view.findViewById(R.id.levelIdEditText);
-        russian1EditText = view.findViewById(R.id.russian1EditText);
-        english1EditText = view.findViewById(R.id.english1EditText);
-        russian2EditText = view.findViewById(R.id.russian2EditText);
-        english2EditText = view.findViewById(R.id.english2EditText);
-        russian3EditText = view.findViewById(R.id.russian3EditText);
-        english3EditText = view.findViewById(R.id.english3EditText);
-        russian4EditText = view.findViewById(R.id.russian4EditText);
-        english4EditText = view.findViewById(R.id.english4EditText);
-        russian5EditText = view.findViewById(R.id.russian5EditText);
-        english5EditText = view.findViewById(R.id.english5EditText);
-        saveButton = view.findViewById(R.id.saveButton);
+        levelIdEditText = findViewById(R.id.levelIdEditText);
+        russian1EditText = findViewById(R.id.russian1EditText);
+        english1EditText = findViewById(R.id.english1EditText);
+        russian2EditText = findViewById(R.id.russian2EditText);
+        english2EditText = findViewById(R.id.english2EditText);
+        russian3EditText = findViewById(R.id.russian3EditText);
+        english3EditText = findViewById(R.id.english3EditText);
+        russian4EditText = findViewById(R.id.russian4EditText);
+        english4EditText = findViewById(R.id.english4EditText);
+        russian5EditText = findViewById(R.id.russian5EditText);
+        english5EditText = findViewById(R.id.english5EditText);
+        saveButton = findViewById(R.id.saveButton);
+        ImageButton backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v -> finish());
         db = FirebaseFirestore.getInstance();
 
         saveButton.setOnClickListener(v -> saveLevel());
-
-        return view;
     }
 
     private void saveLevel() {
@@ -67,82 +66,88 @@ public class SentenceBuilderAdminFragment extends Fragment {
                 russian5EditText.getText().toString().trim()
         };
         String[] englishSentences = {
-                english1EditText.getText().toString().trim(),
-                english2EditText.getText().toString().trim(),
-                english3EditText.getText().toString().trim(),
-                english4EditText.getText().toString().trim(),
-                english5EditText.getText().toString().trim()
+                english1EditText.getText().toString().trim().replaceAll("\\s+", " "),
+                english2EditText.getText().toString().trim().replaceAll("\\s+", " "),
+                english3EditText.getText().toString().trim().replaceAll("\\s+", " "),
+                english4EditText.getText().toString().trim().replaceAll("\\s+", " "),
+                english5EditText.getText().toString().trim().replaceAll("\\s+", " ")
         };
 
-        // Проверка обязательных полей
+        // Проверка на пустые поля
         if (levelId.isEmpty()) {
-            Toast.makeText(getContext(), "Please fill in Level ID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill in Level ID", Toast.LENGTH_SHORT).show();
             return;
         }
         for (int i = 0; i < 5; i++) {
             if (russianSentences[i].isEmpty() || englishSentences[i].isEmpty()) {
-                Toast.makeText(getContext(), "Please fill in all Russian and English fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please fill in all Russian and English fields", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Формируем список предложений
-        List<Map<String, Object>> sentences = new ArrayList<>();
+        // Проверка русских предложений (только русские символы)
         for (int i = 0; i < 5; i++) {
-            String russian = russianSentences[i];
-            String english = englishSentences[i];
-
-            // Формируем список слов из английского перевода
-            List<String> words = new ArrayList<>(Arrays.asList(english.split("\\s+")));
-
-            // Добавляем случайные лишние слова
-            int extraWordsCount = 2 + new Random().nextInt(3); // 2–4 лишних слова
-            List<String> shuffledExtraWords = new ArrayList<>(EXTRA_WORDS);
-            Collections.shuffle(shuffledExtraWords);
-            for (int j = 0; j < extraWordsCount && j < shuffledExtraWords.size(); j++) {
-                String extraWord = shuffledExtraWords.get(j);
-                if (!words.contains(extraWord)) {
-                    words.add(extraWord);
-                }
+            if (!russianSentences[i].matches("^[а-яА-ЯёЁ\\s.,!?'-]+$")) {
+                Toast.makeText(this, "Sentence " + (i + 1) + " (Russian) must contain only Russian characters", Toast.LENGTH_SHORT).show();
+                return;
             }
-            Collections.shuffle(words); // Перемешиваем слова
-
-            // Создаём объект предложения
-            Map<String, Object> sentence = new HashMap<>();
-            sentence.put("russian", russian);
-            sentence.put("english", english);
-            sentence.put("words", words);
-            sentences.add(sentence);
         }
 
-        // Формируем данные уровня
-        Map<String, Object> levelData = new HashMap<>();
-        levelData.put("sentences", sentences);
+        // Проверка английских предложений (только английские символы)
+        for (int i = 0; i < 5; i++) {
+            if (!englishSentences[i].matches("^[a-zA-Z\\s.,!?'-]+$")) {
+                Toast.makeText(this, "Sentence " + (i + 1) + " (English) must contain only English characters", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
 
-        // Сохранение в Firestore в коллекцию sentenceLevels
-        db.collection("sentenceLevels")
-                .document(levelId)
-                .set(levelData)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Level saved successfully", Toast.LENGTH_SHORT).show();
-                    clearFields();
+        // Проверка существования ID в Firestore
+        db.collection("sentenceLevels").document(levelId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Toast.makeText(this, "Level ID already exists", Toast.LENGTH_SHORT).show();
+                    } else {
+                        List<Map<String, Object>> sentences = new ArrayList<>();
+                        for (int i = 0; i < 5; i++) {
+                            String russian = russianSentences[i];
+                            String english = englishSentences[i];
+
+                            List<String> words = new ArrayList<>(Arrays.asList(english.split("\\s+")));
+                            int extraWordsCount = 2 + new Random().nextInt(3);
+                            List<String> shuffledExtraWords = new ArrayList<>(EXTRA_WORDS);
+                            Collections.shuffle(shuffledExtraWords);
+                            for (int j = 0; j < extraWordsCount && j < shuffledExtraWords.size(); j++) {
+                                String extraWord = shuffledExtraWords.get(j);
+                                if (!words.contains(extraWord)) {
+                                    words.add(extraWord);
+                                }
+                            }
+                            Collections.shuffle(words);
+
+                            Map<String, Object> sentence = new HashMap<>();
+                            sentence.put("russian", russian);
+                            sentence.put("english", english);
+                            sentence.put("words", words);
+                            sentences.add(sentence);
+                        }
+
+                        Map<String, Object> levelData = new HashMap<>();
+                        levelData.put("sentences", sentences);
+
+                        db.collection("sentenceLevels")
+                                .document(levelId)
+                                .set(levelData)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(this, "Level added successfully", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Error adding level: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                    }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error saving level: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error checking level ID: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-    }
-
-    private void clearFields() {
-        levelIdEditText.setText("");
-        russian1EditText.setText("");
-        english1EditText.setText("");
-        russian2EditText.setText("");
-        english2EditText.setText("");
-        russian3EditText.setText("");
-        english3EditText.setText("");
-        russian4EditText.setText("");
-        english4EditText.setText("");
-        russian5EditText.setText("");
-        english5EditText.setText("");
     }
 }

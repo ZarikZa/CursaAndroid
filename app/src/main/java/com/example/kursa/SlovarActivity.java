@@ -1,128 +1,170 @@
 package com.example.kursa;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SlovarFragment extends Fragment {
+public class SlovarActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private WordAdapter adapter;
-    private List<Word> wordList;
-    private List<Word> allWordsList;
-    private List<Word> hardWordsList;
+    private List<WordLevel> wordList;
+    private List<WordLevel> allWordsList;
+    private List<WordLevel> hardWordsList;
     private String userNickname;
     private Button btnAllWords, btnHardWords;
+    private ImageButton backBtm;
+    private FirebaseFirestore db;
+    private boolean showingHardWords = false;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.frame_slorar);
 
-        if (getArguments() != null) {
-            userNickname = getArguments().getString("USER_NICKNAME");
+        db = FirebaseFirestore.getInstance();
+        userNickname = getIntent().getStringExtra("USER_NICKNAME");
+        if (userNickname == null) {
+            Toast.makeText(this, "Error: Missing nickname", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
+
+        initializeViews();
+        setupRecyclerView();
+        setupButtons();
+        loadWordsFromFirebase();
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.frame_slorar, container, false);
-
-        recyclerView = view.findViewById(R.id.learnedWordsList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        btnAllWords = view.findViewById(R.id.btnAllWords);
-        btnHardWords = view.findViewById(R.id.btnHardWords);
-
+    private void initializeViews() {
+        recyclerView = findViewById(R.id.learnedWordsList);
+        btnAllWords = findViewById(R.id.btnAllWords);
+        btnHardWords = findViewById(R.id.btnHardWords);
+        backBtm = findViewById(R.id.backButton);
         wordList = new ArrayList<>();
         allWordsList = new ArrayList<>();
         hardWordsList = new ArrayList<>();
+    }
 
-        adapter = new WordAdapter(wordList);
+    private void setupRecyclerView() {
+        adapter = new WordAdapter(wordList, this::deleteHardWord);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+    }
 
-        btnAllWords.setOnClickListener(v -> showAllWords());
-        btnHardWords.setOnClickListener(v -> showHardWords());
-
-        loadWordsFromFirebase();
-
-        return view;
+    private void setupButtons() {
+        btnAllWords.setOnClickListener(v -> {
+            showingHardWords = false;
+            showAllWords();
+        });
+        btnHardWords.setOnClickListener(v -> {
+            showingHardWords = true;
+            showHardWords();
+        });
+        backBtm.setOnClickListener(v -> finish());
     }
 
     private void loadWordsFromFirebase() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         db.collection("usersLearnedWords").document(userNickname)
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        Map<String, Object> wordsMap = (Map<String, Object>) documentSnapshot.get("words");
+                .addOnSuccessListener(this::processWords)
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Ошибка загрузки слов: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
 
-                        if (wordsMap != null && !wordsMap.isEmpty()) {
-                            allWordsList.clear();
-                            hardWordsList.clear();
+    private void processWords(DocumentSnapshot documentSnapshot) {
+        if (!documentSnapshot.exists()) {
+            Toast.makeText(this, "Документ пользователя не найден", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                            for (Map.Entry<String, Object> entry : wordsMap.entrySet()) {
-                                String englishWord = entry.getKey();
+        Map<String, Object> wordsMap = (Map<String, Object>) documentSnapshot.get("words");
+        if (wordsMap == null || wordsMap.isEmpty()) {
+            Toast.makeText(this, "Словарь пуст", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                                if (entry.getValue() instanceof String) {
-                                    String translation = (String) entry.getValue();
-                                    allWordsList.add(new Word(englishWord, translation));
-                                } else if (entry.getValue() instanceof Map) {
-                                    Map<String, Object> wordData = (Map<String, Object>) entry.getValue();
-                                    String translation = (String) wordData.get("translation");
-                                    Boolean isHard = (Boolean) wordData.get("hard");
+        allWordsList.clear();
+        hardWordsList.clear();
 
-                                    Word word = new Word(englishWord, translation);
-                                    allWordsList.add(word);
+        for (Map.Entry<String, Object> entry : wordsMap.entrySet()) {
+            String englishWord = entry.getKey();
+            WordLevel word = createWordFromEntry(englishWord, entry.getValue());
 
-                                    if (isHard != null && isHard) {
-                                        hardWordsList.add(word);
-                                    }
-                                }
-                            }
+            if (word != null) {
+                allWordsList.add(word);
+                if (word.isHard()) {
+                    hardWordsList.add(word);
+                }
+            }
+        }
 
-                            showAllWords();
-                        } else {
-                            Toast.makeText(requireActivity(), "Словарь пуст", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(requireActivity(), "Документ пользователя не найден", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(requireActivity(), "Ошибка загрузки слов: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        if (showingHardWords) {
+            showHardWords();
+        } else {
+            showAllWords();
+        }
+    }
+
+    private WordLevel createWordFromEntry(String englishWord, Object value) {
+        if (value instanceof String) {
+            return new WordLevel(englishWord, (String) value, false);
+        } else if (value instanceof Map) {
+            Map<String, Object> wordData = (Map<String, Object>) value;
+            String translation = (String) wordData.get("translation");
+            Boolean isHard = (Boolean) wordData.get("hard");
+            return new WordLevel(englishWord, translation, isHard != null && isHard);
+        }
+        return null;
     }
 
     private void showAllWords() {
-        wordList.clear();
-        wordList.addAll(allWordsList);
-        adapter.notifyDataSetChanged();
-
-        btnAllWords.setBackgroundTintList(getResources().getColorStateList(R.color.selected_button_color));
-        btnHardWords.setBackgroundTintList(getResources().getColorStateList(R.color.unselected_button_color));
+        updateWordList(allWordsList);
+        updateButtonColors(true);
     }
 
     private void showHardWords() {
-        wordList.clear();
-        wordList.addAll(hardWordsList);
-        adapter.notifyDataSetChanged();
+        updateWordList(hardWordsList);
+        updateButtonColors(false);
+    }
 
-        btnAllWords.setBackgroundTintList(getResources().getColorStateList(R.color.unselected_button_color));
-        btnHardWords.setBackgroundTintList(getResources().getColorStateList(R.color.selected_button_color));
+    private void updateWordList(List<WordLevel> words) {
+        wordList.clear();
+        wordList.addAll(words);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void updateButtonColors(boolean isAllWordsSelected) {
+        btnAllWords.setBackgroundTintList(getResources().getColorStateList(
+                isAllWordsSelected ? R.color.selected_button_color : R.color.unselected_button_color));
+        btnHardWords.setBackgroundTintList(getResources().getColorStateList(
+                isAllWordsSelected ? R.color.unselected_button_color : R.color.selected_button_color));
+    }
+
+    private void deleteHardWord(WordLevel word) {
+        db.collection("usersLearnedWords").document(userNickname)
+                .update("words." + word.getEnglish() + ".hard", false)
+                .addOnSuccessListener(aVoid -> {
+                    word.setHard(false);
+                    hardWordsList.remove(word);
+
+                    // Обновляем текущий список в зависимости от того, что показывается
+                    if (showingHardWords) {
+                        wordList.remove(word);
+                    }
+                    adapter.notifyDataSetChanged();
+
+                    Toast.makeText(this, "Слово удалено из сложных", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Ошибка удаления: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }

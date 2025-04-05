@@ -10,107 +10,135 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 public class LevelsFragment extends Fragment {
+    private static final String TAG = "LevelsFragment";
+    private static final int LEVEL_ACTIVITY_REQUEST_CODE = 1;
 
     private RecyclerView recyclerView;
     private LevelsAdapter levelsAdapter;
-    private List<Level> levels;
+    private List<Level> levels = new ArrayList<>();
     private FirebaseFirestore db;
     private String userNickname;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frame_levels, container, false);
-
-        // Ensure that userNickname is passed as an argument to this fragment
-        if (getArguments() != null) {
-            userNickname = getArguments().getString("USER_NICKNAME");
-        }
-
-        if (userNickname == null) {
-            Toast.makeText(getContext(), "User nickname is missing", Toast.LENGTH_SHORT).show();
-            return view;  // Exit early if userNickname is not provided
-        }
-
-        recyclerView = view.findViewById(R.id.levels_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        levels = new ArrayList<>();
-        levelsAdapter = new LevelsAdapter(levels, level -> {
-            Intent intent = new Intent(getContext(), LevelActivActivity.class);
-            intent.putExtra("level", level);
-            intent.putExtra("nickname", userNickname);
-            startActivityForResult(intent, 1);
-            loadLevels();
-        });
-        recyclerView.setAdapter(levelsAdapter);
-
-        db = FirebaseFirestore.getInstance();
-        loadLevels();
-
+        initializeViews(view);
         return view;
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            loadLevels();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (getArguments() != null) {
+            userNickname = getArguments().getString("USER_NICKNAME");
         }
+        setupRecyclerView();
+        loadLevels();
+    }
+
+    private void initializeViews(View view) {
+        recyclerView = view.findViewById(R.id.levels_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        db = FirebaseFirestore.getInstance();
+    }
+
+    private void setupRecyclerView() {
+        levelsAdapter = new LevelsAdapter(levels, level -> {
+            Intent intent = new Intent(getContext(), LevelActivActivity.class);
+            intent.putExtra("level", level);
+            intent.putExtra("nickname", userNickname);
+            startActivityForResult(intent, LEVEL_ACTIVITY_REQUEST_CODE);
+        });
+        recyclerView.setAdapter(levelsAdapter);
     }
 
     private void loadLevels() {
-        if (userNickname == null) {
-            Toast.makeText(getContext(), "User nickname is missing", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (userNickname == null || !isAdded()) return;
 
         db.collection("levels")
                 .document(userNickname)
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        Map<String, Object> userData = (Map<String, Object>) documentSnapshot.getData();
-                        List<Map<String, Object>> levelsData = (List<Map<String, Object>>) userData.get("levels");
+                .addOnSuccessListener(this::processLevelsData)
+                .addOnFailureListener(this::handleLoadError);
+    }
 
-                        if (levelsData != null) {
-                            levels.clear();
+    private void processLevelsData(DocumentSnapshot documentSnapshot) {
+        if (!documentSnapshot.exists()) {
+            showToast("No data found for the user");
+            return;
+        }
 
-                            for (Map<String, Object> levelData : levelsData) {
-                                String levelName = (String) levelData.get("levelName");
-                                Map<String, Object> levelDetails = (Map<String, Object>) levelData.get("details");
+        levels.clear();
+        Map<String, Object> userData = documentSnapshot.getData();
+        if (userData == null) return;
 
-                                boolean isUnlocked = (boolean) levelDetails.get("isUnlocked");
-                                Map<String, String> wordsMap = (Map<String, String>) levelDetails.get("words");
-                                List<Word> words = new ArrayList<>();
+        List<Map<String, Object>> levelsData = (List<Map<String, Object>>) userData.get("levels");
+        if (levelsData == null) return;
 
-                                if (wordsMap != null) {
-                                    for (Map.Entry<String, String> entry : wordsMap.entrySet()) {
-                                        words.add(new Word(entry.getKey(), entry.getValue()));
-                                    }
-                                }
+        for (Map<String, Object> levelData : levelsData) {
+            try {
+                Level level = createLevelFromData(levelData);
+                if (level != null) {
+                    levels.add(level);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error parsing level data", e);
+            }
+        }
 
-                                Level level = new Level(levelName, words, isUnlocked);
-                                levels.add(level);
-                            }
+        levelsAdapter.notifyDataSetChanged();
+    }
 
-                            levelsAdapter.notifyDataSetChanged();  // Notify adapter to update the view
-                        }
-                    } else {
-                        Toast.makeText(getContext(), "No data found for the user", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error loading levels: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+    private Level createLevelFromData(Map<String, Object> levelData) {
+        String levelName = (String) levelData.get("levelName");
+        Map<String, Object> levelDetails = (Map<String, Object>) levelData.get("details");
+
+        if (levelName == null || levelDetails == null) return null;
+
+        boolean isUnlocked = Boolean.TRUE.equals(levelDetails.get("isUnlocked"));
+        Map<String, String> wordsMap = (Map<String, String>) levelDetails.get("words");
+        List<Word> words = new ArrayList<>();
+
+        if (wordsMap != null) {
+            for (Map.Entry<String, String> entry : wordsMap.entrySet()) {
+                words.add(new Word(entry.getKey(), entry.getValue()));
+            }
+        }
+
+        return new Level(levelName, words, isUnlocked);
+    }
+
+    private void handleLoadError(Exception e) {
+        showToast("Error loading levels");
+        Log.e(TAG, "Error loading levels", e);
+    }
+
+    private void showToast(String message) {
+        if (isAdded()) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == LEVEL_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+            Log.d(TAG, "Level completed, refreshing levels list");
+            loadLevels();
+        }
     }
 }

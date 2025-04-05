@@ -89,6 +89,8 @@ public class TestActivity extends AppCompatActivity {
             contentTextView.append("\n\n" + progressText);
             Toast.makeText(this, "Обучение завершено", Toast.LENGTH_SHORT).show();
             completeButton.setVisibility(View.VISIBLE);
+            inputTranslationEditText.setVisibility(View.GONE);
+            checkTranslationButton.setVisibility(View.GONE);
             setEditTextStyle(inputTranslationEditText);
             showResult();
             return;

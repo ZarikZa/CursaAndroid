@@ -2,45 +2,50 @@ package com.example.kursa;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-public class LevelListActivity extends AppCompatActivity {
+public class LevelListFragment extends Fragment {
 
     private LinearLayout levelContainer;
     private Button addLevelButton;
     private FirebaseFirestore db;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_level_list);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_level_list, container, false);
 
-        levelContainer = findViewById(R.id.levelContainer);
-        addLevelButton = findViewById(R.id.addLevelButton);
+        levelContainer = view.findViewById(R.id.levelContainer);
+        addLevelButton = view.findViewById(R.id.addLevelButton);
         db = FirebaseFirestore.getInstance();
 
         addLevelButton.setOnClickListener(v -> {
-            Intent intent = new Intent(LevelListActivity.this, LevelAddActivity.class);
+            Intent intent = new Intent(requireActivity(), LevelAddActivity.class);
             startActivity(intent);
         });
 
         loadLevels();
+
+        return view;
     }
 
     private void loadLevels() {
         db.collection("sentenceLevels")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!isAdded()) return; // Проверяем, что фрагмент прикреплён
                     levelContainer.removeAllViews(); // Очищаем контейнер перед загрузкой
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String levelId = document.getId();
 
-                        Button levelButton = new Button(this);
+                        Button levelButton = new Button(requireContext());
                         levelButton.setText("Level: " + levelId);
                         levelButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#363636")));
                         levelButton.setTextColor(android.graphics.Color.parseColor("#E0E0E0"));
@@ -53,7 +58,7 @@ public class LevelListActivity extends AppCompatActivity {
                         levelButton.setLayoutParams(params);
 
                         levelButton.setOnClickListener(v -> {
-                            Intent intent = new Intent(LevelListActivity.this, LevelEditActivity.class);
+                            Intent intent = new Intent(requireActivity(), LevelEditActivity.class);
                             intent.putExtra("LEVEL_ID", levelId);
                             startActivity(intent);
                         });
@@ -61,16 +66,18 @@ public class LevelListActivity extends AppCompatActivity {
                         levelContainer.addView(levelButton);
                     }
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Toast.makeText(this, "No levels found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "No levels found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading levels: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (isAdded()) {
+                        Toast.makeText(requireContext(), "Error loading levels: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         loadLevels(); // Обновляем список уровней при возвращении
     }

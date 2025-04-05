@@ -20,4 +20,5 @@ public class Word implements Serializable {
     public String getTranslation() {
         return translation;
     }
+
 }

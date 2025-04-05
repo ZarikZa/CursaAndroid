@@ -2,6 +2,7 @@ package com.example.kursa;
 
 import android.os.AsyncTask;
 import android.util.Log;
+
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -21,14 +22,14 @@ public class SendMailTask extends AsyncTask<Void, Void, Boolean> {
         this.subject = subject;
         this.body = body;
     }
-    //wzmc djkk phpx kswu
+
     @Override
     protected Boolean doInBackground(Void... voids) {
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com"); // SMTP сервер (например, Gmail)
-        props.put("mail.smtp.port", "587"); // Порт SMTP
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true"); // Использование TLS
+        props.put("mail.smtp.starttls.enable", "true");
 
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
@@ -42,12 +43,14 @@ public class SendMailTask extends AsyncTask<Void, Void, Boolean> {
             message.setFrom(new InternetAddress(senderEmail));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
             message.setSubject(subject);
-            message.setText(body);
+
+            // Устанавливаем тип содержимого как HTML
+            message.setContent(body, "text/html; charset=utf-8");
 
             Transport.send(message);
             return true;
         } catch (MessagingException e) {
-            Log.e("SendMailTask", "Govno ooooo", e);
+            Log.e("SendMailTask", "Ошибка при отправке письма: " + e.getMessage(), e);
             return false;
         }
     }
@@ -55,9 +58,9 @@ public class SendMailTask extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean success) {
         if (success) {
-            Log.d("SendMailTask", "Ura");
+            Log.d("SendMailTask", "Письмо успешно отправлено!");
         } else {
-            Log.e("SendMailTask", "GOVNO");
+            Log.e("SendMailTask", "Не удалось отправить письмо.");
         }
     }
 }

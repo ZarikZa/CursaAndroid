@@ -1,6 +1,7 @@
 package com.example.kursa;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +23,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView forgotPass;
     private EditText usernameEditText, passwordEditText;
     private FirebaseFirestore db;
+    private SharedPreferences sharedPreferences;
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_PASSWORD = "password";
+    private static final String KEY_REMEMBER = "remember";
+    private static final String KEY_ROLE = "role"; // Новый ключ для роли
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,22 +36,38 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Запуск фоновой задачи
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         WorkManagerHelper.scheduleDailyTask(this);
+
+        boolean remember = sharedPreferences.getBoolean(KEY_REMEMBER, false);
+        if (remember) {
+            String savedUsername = sharedPreferences.getString(KEY_USERNAME, "");
+            String savedRole = sharedPreferences.getString(KEY_ROLE, "user");
+            Intent intent;
+            if ("admin".equals(savedRole)) {
+                intent = new Intent(MainActivity.this, NavigationAdminActivity.class);
+            } else {
+                intent = new Intent(MainActivity.this, NavigationActivity.class);
+            }
+            intent.putExtra("USER_NICKNAME", savedUsername);
+            startActivity(intent);
+            finish();
+        }
 
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
         db = FirebaseFirestore.getInstance();
         enter = findViewById(R.id.loginButton);
+        regist = findViewById(R.id.registerButton);
+        forgotPass = findViewById(R.id.forgotPassword);
+
         enter.setOnClickListener(v -> onLoginButtonClick());
 
-        regist = findViewById(R.id.registerButton);
         regist.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
 
-        forgotPass = findViewById(R.id.forgotPassword);
         forgotPass.setOnClickListener(v -> {
             Intent intent = new Intent(this, ChangePasswordActivity.class);
             startActivity(intent);
@@ -68,16 +91,28 @@ public class MainActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (!querySnapshot.isEmpty()) {
+                            // Успешный вход, получаем данные пользователя
                             DocumentSnapshot userDoc = querySnapshot.getDocuments().get(0);
                             String nickname = userDoc.getString("nickname");
                             String role = userDoc.getString("role");
-                            if (Objects.equals(role, "user")) {
-                                Intent intent = new Intent(MainActivity.this, NavigationActivity.class);
+
+                            // Сохраняем данные в SharedPreferences
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(KEY_USERNAME, username);
+                            editor.putString(KEY_PASSWORD, password);
+                            editor.putBoolean(KEY_REMEMBER, true);
+                            editor.putString(KEY_ROLE, role); // Сохраняем роль как строку
+                            editor.apply();
+
+                            // Переход на нужную активность в зависимости от роли
+                            Intent intent;
+                            if ("user".equals(role)) {
+                                intent = new Intent(MainActivity.this, NavigationActivity.class);
                                 intent.putExtra("USER_NICKNAME", nickname);
                                 startActivity(intent);
                                 finish();
-                            } else {
-                                Intent intent = new Intent(MainActivity.this, NavigationAdminActivity.class);
+                            } else { // Предполагаем, что другая роль — "admin"
+                                intent = new Intent(MainActivity.this, NavigationAdminActivity.class);
                                 intent.putExtra("USER_NICKNAME", nickname);
                                 startActivity(intent);
                                 finish();
@@ -89,5 +124,14 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Ошибка авторизации: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void clearSavedCredentials() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(KEY_USERNAME);
+        editor.remove(KEY_PASSWORD);
+        editor.remove(KEY_ROLE); // Удаляем роль при очистке
+        editor.putBoolean(KEY_REMEMBER, false);
+        editor.apply();
     }
 }

@@ -1,6 +1,10 @@
 package com.example.kursa;
+
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -11,50 +15,68 @@ import java.util.List;
 import java.util.Map;
 
 public class FirestoreHelper {
+    private static final String TAG = "FirestoreHelper";
     private final FirebaseFirestore db;
+    private UpdateListener updateListener;
+
+    public interface UpdateListener {
+        void onUpdateComplete(boolean success);
+    }
 
     public FirestoreHelper() {
         db = FirebaseFirestore.getInstance();
+        Log.d(TAG, "FirestoreHelper initialized");
+    }
+
+    public void setUpdateListener(UpdateListener listener) {
+        this.updateListener = listener;
     }
 
     public void checkAndUpdateData(Parser parser, WordSelector wordSelector) {
         String todayDate = DateHelper.getTodayDate();
+        Log.d(TAG, "Checking data for date: " + todayDate);
 
-        Task<DocumentSnapshot> task = db.collection("dailyWords")
+        db.collection("dailyWords")
                 .document("current")
-                .get();
-
-        task.addOnCompleteListener(taskResult -> {
-            if (taskResult.isSuccessful()) {
-                DocumentSnapshot document = taskResult.getResult();
-                if (document != null && document.exists()) {
-                    String savedDate = document.getString("date");
-                    if (savedDate != null && todayDate.equals(savedDate)) {
-                        Log.d("FirestoreHelper", "Данные за сегодня уже обновлены.");
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null && document.exists()) {
+                            String savedDate = document.getString("date");
+                            if (savedDate != null && todayDate.equals(savedDate)) {
+                                Log.d(TAG, "Data already updated for today");
+                                if (updateListener != null) {
+                                    updateListener.onUpdateComplete(true);
+                                }
+                            } else {
+                                Log.d(TAG, "Data needs update");
+                                updateDailyWords(parser, wordSelector, todayDate);
+                            }
+                        } else {
+                            Log.d(TAG, "Document doesn't exist");
+                            updateDailyWords(parser, wordSelector, todayDate);
+                        }
                     } else {
-                        Log.d("FirestoreHelper", "Обновление данных...");
-                        updateDailyWords(parser, wordSelector, todayDate);
+                        Log.e(TAG, "Error checking date", task.getException());
+                        if (updateListener != null) {
+                            updateListener.onUpdateComplete(false);
+                        }
                     }
-                } else {
-                    Log.d("FirestoreHelper", "Документ current не найден. Создание нового...");
-                    updateDailyWords(parser, wordSelector, todayDate);
-                }
-            } else {
-                Log.e("FirestoreHelper", "Ошибка при проверке даты: ", taskResult.getException());
-            }
-        });
+                });
     }
 
     private void updateDailyWords(Parser parser, WordSelector wordSelector, String todayDate) {
         new Thread(() -> {
             try {
                 List<Word> words = parser.parseSkyengWords();
-
                 List<Word> selectedWords = wordSelector.getRandomWords(words, 10);
-
                 saveDailyWords(selectedWords, todayDate);
             } catch (IOException e) {
-                Log.e("FirestoreHelper", "Ошибка при парсинге: ", e);
+                Log.e(TAG, "Parsing error", e);
+                if (updateListener != null) {
+                    updateListener.onUpdateComplete(false);
+                }
             }
         }).start();
     }
@@ -64,8 +86,20 @@ public class FirestoreHelper {
         data.put("date", todayDate);
         data.put("words", words);
 
-        db.collection("dailyWords").document("current").set(data)
-                .addOnSuccessListener(aVoid -> Log.d("FirestoreHelper", "Данные успешно обновлены."))
-                .addOnFailureListener(e -> Log.e("FirestoreHelper", "Ошибка при обновлении: ", e));
+        db.collection("dailyWords")
+                .document("current")
+                .set(data)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Data successfully updated");
+                    if (updateListener != null) {
+                        updateListener.onUpdateComplete(true);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Update failed", e);
+                    if (updateListener != null) {
+                        updateListener.onUpdateComplete(false);
+                    }
+                });
     }
 }
