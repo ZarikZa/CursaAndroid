@@ -5,16 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -23,7 +20,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +28,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
+/**
+ * ProfileFragment — фрагмент для отображения профиля пользователя.
+ * Показывает логин, никнейм, количество изученных слов, рейтинговые баллы и место в рейтинге.
+ * Содержит график изученных слов за последние 7 дней, а также кнопки для выхода,
+ * смены пароля и перехода к словарю.
+ */
 public class ProfileFragment extends Fragment {
 
     private TextView loginTextView, nicknameTextView, rankingTextView,
@@ -42,9 +43,17 @@ public class ProfileFragment extends Fragment {
     private Button logoutButton, changePasswordButton, slovarBtm;
     private String login, nickname;
 
+    /**
+     * Создает представление фрагмента, инициализирует элементы интерфейса,
+     * настраивает график и обработчики событий.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frame_profile, container, false);
 
         loginTextView = view.findViewById(R.id.loginTextView);
@@ -88,6 +97,9 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Настраивает параметры графика изученных слов.
+     */
     private void setupChart() {
         wordCountChart.getDescription().setEnabled(false);
         wordCountChart.setTouchEnabled(true);
@@ -102,6 +114,12 @@ public class ProfileFragment extends Fragment {
         showNoDataMessage("Здесь будет график изученных слов");
     }
 
+    /**
+     * Загружает данные о количестве изученных слов за указанный период.
+     *
+     * @param nickname Никнейм пользователя
+     * @param days     Количество дней для анализа
+     */
     private void fetchDailyWordCount(String nickname, int days) {
         String endDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         long startTime = System.currentTimeMillis() - (days - 1) * 24 * 60 * 60 * 1000;
@@ -134,11 +152,15 @@ public class ProfileFragment extends Fragment {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Error fetching daily word count", e);
                     showNoDataMessage("Ошибка загрузки данных");
                 });
     }
 
+    /**
+     * Отображает график на основе данных о словах.
+     *
+     * @param wordCountMap Карта с датами и количеством слов
+     */
     private void displayChart(Map<String, Integer> wordCountMap) {
         List<Entry> entries = new ArrayList<>();
         List<String> dates = new ArrayList<>(wordCountMap.keySet());
@@ -166,12 +188,20 @@ public class ProfileFragment extends Fragment {
         noChartDataText.setVisibility(View.GONE);
     }
 
+    /**
+     * Показывает сообщение, если данных для графика нет.
+     *
+     * @param message Текст сообщения
+     */
     private void showNoDataMessage(String message) {
         noChartDataText.setText(message);
         noChartDataText.setVisibility(View.VISIBLE);
         wordCountChart.setVisibility(View.GONE);
     }
 
+    /**
+     * Показывает диалог подтверждения выхода из аккаунта.
+     */
     private void showLogoutConfirmationDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Подтверждение выхода")
@@ -181,6 +211,10 @@ public class ProfileFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Выполняет выход из аккаунта, очищает SharedPreferences и перенаправляет
+     * на экран авторизации.
+     */
     private void performLogout() {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -193,6 +227,11 @@ public class ProfileFragment extends Fragment {
         requireActivity().finish();
     }
 
+    /**
+     * Загружает данные пользователя из Firestore по никнейму.
+     *
+     * @param nickname Никнейм пользователя
+     */
     private void fetchUserData(String nickname) {
         db.collection("users")
                 .whereEqualTo("nickname", nickname)
@@ -210,15 +249,16 @@ public class ProfileFragment extends Fragment {
 
                         fetchWordsLearnedData(nickname);
                         fetchRanking(userId, reytingPoints);
-                    } else {
-                        Log.e("Firestore", "No user found with nickname: " + nickname);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Error fetching user data", e);
-                });
+                .addOnFailureListener(e -> {});
     }
 
+    /**
+     * Загружает данные об изученных словах пользователя.
+     *
+     * @param nickname Никнейм пользователя
+     */
     private void fetchWordsLearnedData(String nickname) {
         db.collection("usersLearnedWords")
                 .document(nickname)
@@ -233,11 +273,15 @@ public class ProfileFragment extends Fragment {
                         }
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Error fetching words learned data", e);
-                });
+                .addOnFailureListener(e -> {});
     }
 
+    /**
+     * Определяет место пользователя в рейтинге на основе рейтинговых баллов.
+     *
+     * @param userId           ID пользователя
+     * @param userReytingPoints Рейтинговые баллы пользователя
+     */
     private void fetchRanking(String userId, long userReytingPoints) {
         db.collection("users")
                 .orderBy("reytingPoints", Query.Direction.DESCENDING)
@@ -255,8 +299,6 @@ public class ProfileFragment extends Fragment {
                         }
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Error fetching ranking data", e);
-                });
+                .addOnFailureListener(e -> {});
     }
 }

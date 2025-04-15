@@ -33,6 +33,13 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+/**
+ * ChangePasswordActivity — активность для сброса и изменения пароля пользователя.
+ * Позволяет пользователю ввести email, получить код подтверждения, ввести новый пароль и подтвердить его.
+ * Использует Firestore для проверки email и обновления пароля, а также отправляет email с кодом
+ * подтверждения через SMTP-сервер. Включает валидацию пароля, проверку интернет-соединения и обратную связь через Toast.
+ */
+
 public class ChangePasswordActivity extends AppCompatActivity {
     private EditText emailEditText;
     private EditText verificationCodeEditText;
@@ -46,6 +53,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private String userId;
     private String verificationCode;
 
+    /**
+     * Инициализирует активность, устанавливает layout, подключается к Firestore и настраивает
+     * обработчики событий для кнопок отправки кода, верификации и смены пароля.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +66,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        // Инициализация UI элементов
         initializeViews();
 
         backButton.setOnClickListener(v -> finish());
@@ -65,6 +77,10 @@ public class ChangePasswordActivity extends AppCompatActivity {
         changePasswordButton.setOnClickListener(v -> handleChangePassword());
     }
 
+    /**
+     * Инициализирует элементы интерфейса, связывая их с соответствующими ID из layout.
+     * Скрывает поля ввода кода, нового пароля и кнопки, которые не нужны на начальном этапе.
+     */
     private void initializeViews() {
         emailEditText = findViewById(R.id.email);
         verificationCodeEditText = findViewById(R.id.verificationCode);
@@ -84,6 +100,10 @@ public class ChangePasswordActivity extends AppCompatActivity {
         changePasswordButton.setVisibility(View.GONE);
     }
 
+    /**
+     * Обрабатывает запрос на отправку кода подтверждения. Проверяет, заполнено ли поле email
+     * и есть ли интернет-соединение, затем вызывает проверку email в Firestore.
+     */
     private void handleSendCode() {
         String enteredEmail = emailEditText.getText().toString().trim();
 
@@ -100,6 +120,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
         checkEmailInFirestore(enteredEmail);
     }
 
+    /**
+     * Проверяет наличие введенного email в коллекции "users" Firestore.
+     * Если email найден, сохраняет ID пользователя и вызывает отправку кода подтверждения.
+     *
+     * @param email Email для проверки
+     */
     private void checkEmailInFirestore(String email) {
         db.collection("users")
                 .whereEqualTo("email", email)
@@ -126,6 +152,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Отправляет email с кодом подтверждения в отдельном потоке, используя SMTP-сервер mail.ru.
+     * Формирует HTML-содержимое письма и обновляет UI после успешной отправки.
+     *
+     * @param recipientEmail Адрес получателя
+     */
     private void sendVerificationEmail(String recipientEmail) {
         new Thread(() -> {
             try {
@@ -180,6 +212,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Проверяет введенный код подтверждения. Если код верный, открывает поля для ввода нового пароля.
+     */
     private void handleVerifyCode() {
         String enteredCode = verificationCodeEditText.getText().toString().trim();
 
@@ -194,12 +229,15 @@ public class ChangePasswordActivity extends AppCompatActivity {
             newPasswordEditText.setVisibility(View.VISIBLE);
             confirmNewPasswordEditText.setVisibility(View.VISIBLE);
             changePasswordButton.setVisibility(View.VISIBLE);
-            showToast("Код подтвержден");
         } else {
             verificationCodeEditText.setError("Неверный код");
         }
     }
 
+    /**
+     * Обрабатывает смену пароля. Проверяет заполненность полей, валидность пароля и совпадение
+     * паролей, затем вызывает обновление пароля в Firestore.
+     */
     private void handleChangePassword() {
         String newPassword = newPasswordEditText.getText().toString().trim();
         String confirmPassword = confirmNewPasswordEditText.getText().toString().trim();
@@ -220,6 +258,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Обновляет пароль пользователя в коллекции "users" Firestore.
+     *
+     * @param newPassword Новый пароль
+     */
     private void updatePasswordInFirestore(String newPassword) {
         db.collection("users")
                 .document(userId)
@@ -234,6 +277,13 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Проверяет валидность пароля: длина более 8 символов, наличие заглавной буквы,
+     * строчной буквы и цифры.
+     *
+     * @param password Пароль для проверки
+     * @return true, если пароль валиден, иначе false
+     */
     private boolean isPasswordValid(String password) {
         if (password.length() <= 8) {
             showToast("Пароль должен быть больше 8 символов");
@@ -254,18 +304,33 @@ public class ChangePasswordActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Генерирует случайный шестизначный код подтверждения.
+     *
+     * @return Сгенерированный код
+     */
     private String generateVerificationCode() {
         Random random = new Random();
         int code = 100000 + random.nextInt(900000);
         return String.valueOf(code);
     }
 
+    /**
+     * Проверяет наличие активного интернет-соединения.
+     *
+     * @return true, если соединение есть, иначе false
+     */
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnected();
     }
 
+    /**
+     * Показывает Toast-сообщение с заданным текстом.
+     *
+     * @param message Текст сообщения
+     */
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }

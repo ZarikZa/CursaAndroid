@@ -15,7 +15,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * DialogueActivity — активность для интерактивного диалога с пользователем.
+ * Отображает фразы персонажа и варианты ответа, загружает данные диалога из Firestore,
+ * позволяет пользователю выбирать ответы и отслеживает прогресс. Поддерживает отображение
+ * правильных ответов и завершение диалога.
+ */
 public class DialogueActivity extends AppCompatActivity {
 
     private RecyclerView chatRecyclerView;
@@ -28,6 +33,13 @@ public class DialogueActivity extends AppCompatActivity {
     private List<Map<String, Object>> dialogueOptions;
     private String character;
     private ImageButton backBtm;
+
+    /**
+     * Инициализирует активность, устанавливает layout, настраивает RecyclerView для чата
+     * и загружает данные диалога. Проверяет наличие userId и dialogueId.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +59,6 @@ public class DialogueActivity extends AppCompatActivity {
         userId = getIntent().getStringExtra("nickname");
         dialogueId = getIntent().getStringExtra("dialogueId");
         if (userId == null || dialogueId == null) {
-            Toast.makeText(this, "Error: Missing user or dialogue ID", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -60,6 +71,10 @@ public class DialogueActivity extends AppCompatActivity {
         //loadPlayerProgress();
     }
 
+    /**
+     * Загружает данные диалога из Firestore по dialogueId.
+     * Извлекает персонажа и список опций, затем отображает текущий шаг диалога.
+     */
     private void loadDialogue() {
         db.collection("dialogues")
                 .document(dialogueId)
@@ -72,17 +87,22 @@ public class DialogueActivity extends AppCompatActivity {
                         if (dialogueOptions != null && currentStep < dialogueOptions.size()) {
                             displayStep(currentStep);
                         } else {
-                            Toast.makeText(this, "Dialogue not found or completed", Toast.LENGTH_SHORT).show();
                             finish();
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading dialogue: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ошибка загрузки диалога: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     finish();
                 });
     }
 
+    /**
+     * Отображает текущий шаг диалога: фразу персонажа и варианты ответа.
+     * Перемешивает ответы и добавляет фразу в чат с задержкой.
+     *
+     * @param step Номер текущего шага
+     */
     private void displayStep(int step) {
         Map<String, Object> currentPhrase = dialogueOptions.get(step);
         String phraseText = (String) currentPhrase.get("text");
@@ -97,6 +117,12 @@ public class DialogueActivity extends AppCompatActivity {
         }, 500);
     }
 
+    /**
+     * Показывает кнопки с вариантами ответа, устанавливает их текст и обработчики событий.
+     * Скрывает неиспользуемые кнопки.
+     *
+     * @param answers Список вариантов ответа
+     */
     private void showOptions(List<Map<String, Object>> answers) {
         option1Button.setVisibility(View.GONE);
         option2Button.setVisibility(View.GONE);
@@ -118,6 +144,15 @@ public class DialogueActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Обрабатывает выбор ответа пользователем. Добавляет ответ в чат, отключает кнопки,
+     * показывает правильный ответ (если выбран неверный) и переходит к следующему шагу.
+     *
+     * @param choiceIndex Индекс выбранного ответа
+     * @param answerText  Текст выбранного ответа
+     * @param isCorrect   Флаг правильности ответа
+     * @param answers     Список всех ответов
+     */
     private void handleChoice(int choiceIndex, String answerText, boolean isCorrect, List<Map<String, Object>> answers) {
         Button[] buttons = {option1Button, option2Button, option3Button};
         for (Button button : buttons) {
@@ -145,57 +180,10 @@ public class DialogueActivity extends AppCompatActivity {
             if (currentStep < dialogueOptions.size()) {
                 displayStep(currentStep);
             } else {
-                Toast.makeText(this, "Dialogue completed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Диалог завершен!", Toast.LENGTH_SHORT).show();
                 finish();
             }
         }, 2000);
     }
 
-//    private void savePlayerProgress(int choiceIndex) {
-//        Map<String, Object> playerData = new HashMap<>();
-//        playerData.put("currentStep", currentStep + 1);
-//        playerData.put("dialogueId", dialogueId);
-//
-//        db.collection("players")
-//                .document(userId)
-//                .get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    List<Integer> choices = new ArrayList<>();
-//                    if (documentSnapshot.exists()) {
-//                        choices = (List<Integer>) documentSnapshot.get("choices");
-//                        if (choices == null) {
-//                            choices = new ArrayList<>();
-//                        }
-//                    }
-//                    choices.add(choiceIndex);
-//                    playerData.put("choices", choices);
-//
-//                    db.collection("players")
-//                            .document(userId)
-//                            .set(playerData);
-//                });
-//    }
-//
-//    private void loadPlayerProgress() {
-//        db.collection("players")
-//                .document(userId)
-//                .get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        String savedDialogueId = documentSnapshot.getString("dialogueId");
-//                        if (savedDialogueId != null && savedDialogueId.equals(dialogueId)) {
-//                            Long step = documentSnapshot.getLong("currentStep");
-//                            if (step != null) {
-//                                currentStep = step.intValue();
-//                                if (currentStep >= dialogueOptions.size()) {
-//                                    Toast.makeText(this, "Dialogue already completed", Toast.LENGTH_SHORT).show();
-//                                    finish();
-//                                } else {
-//                                    displayStep(currentStep);
-//                                }
-//                            }
-//                        }
-//                    }
-//                });
-//    }
 }

@@ -14,7 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
+/**
+ * LevelAddActivity — активность для создания и сохранения нового уровня предложений в Firestore.
+ * Позволяет ввести ID уровня, пять русских и английских предложений, проверяет их корректность
+ * и сохраняет уровень в коллекции "sentenceLevels" с дополнительными случайными словами.
+ */
 public class LevelAddActivity extends AppCompatActivity {
 
     private TextInputEditText levelIdEditText;
@@ -31,12 +35,17 @@ public class LevelAddActivity extends AppCompatActivity {
             "no", "and", "or", "but", "with", "on", "in", "at", "from", "by"
     );
 
+    /**
+     * Инициализирует активность, устанавливает layout, связывает элементы интерфейса
+     * и настраивает обработчики для кнопок сохранения и возврата.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level_add);
 
-        // Инициализация элементов
         levelIdEditText = findViewById(R.id.levelIdEditText);
         russian1EditText = findViewById(R.id.russian1EditText);
         english1EditText = findViewById(R.id.english1EditText);
@@ -56,6 +65,10 @@ public class LevelAddActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveLevel());
     }
 
+    /**
+     * Собирает данные из полей ввода, выполняет валидацию (пустота, корректность символов, уникальность ID),
+     * добавляет случайные слова и сохраняет уровень в Firestore.
+     */
     private void saveLevel() {
         String levelId = levelIdEditText.getText().toString().trim();
         String[] russianSentences = {
@@ -73,39 +86,35 @@ public class LevelAddActivity extends AppCompatActivity {
                 english5EditText.getText().toString().trim().replaceAll("\\s+", " ")
         };
 
-        // Проверка на пустые поля
         if (levelId.isEmpty()) {
-            Toast.makeText(this, "Please fill in Level ID", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Пожалуйста, заполните ID уровня", Toast.LENGTH_SHORT).show();
             return;
         }
         for (int i = 0; i < 5; i++) {
             if (russianSentences[i].isEmpty() || englishSentences[i].isEmpty()) {
-                Toast.makeText(this, "Please fill in all Russian and English fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Пожалуйста, заполните все поля для русских и английских предложений", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка русских предложений (только русские символы)
         for (int i = 0; i < 5; i++) {
             if (!russianSentences[i].matches("^[а-яА-ЯёЁ\\s.,!?'-]+$")) {
-                Toast.makeText(this, "Sentence " + (i + 1) + " (Russian) must contain only Russian characters", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Предложение " + (i + 1) + " (русское) должно содержать только русские символы", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка английских предложений (только английские символы)
         for (int i = 0; i < 5; i++) {
             if (!englishSentences[i].matches("^[a-zA-Z\\s.,!?'-]+$")) {
-                Toast.makeText(this, "Sentence " + (i + 1) + " (English) must contain only English characters", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Предложение " + (i + 1) + " (английское) должно содержать только английские символы", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка существования ID в Firestore
         db.collection("sentenceLevels").document(levelId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        Toast.makeText(this, "Level ID already exists", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "ID уровня уже существует", Toast.LENGTH_SHORT).show();
                     } else {
                         List<Map<String, Object>> sentences = new ArrayList<>();
                         for (int i = 0; i < 5; i++) {
@@ -138,16 +147,16 @@ public class LevelAddActivity extends AppCompatActivity {
                                 .document(levelId)
                                 .set(levelData)
                                 .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(this, "Level added successfully", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Уровень успешно добавлен", Toast.LENGTH_SHORT).show();
                                     finish();
                                 })
                                 .addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Error adding level: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Ошибка при добавлении уровня: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 });
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error checking level ID: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ошибка при проверке ID уровня: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

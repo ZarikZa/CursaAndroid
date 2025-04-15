@@ -10,17 +10,29 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+/**
+ * ReytingFragment — фрагмент для отображения рейтинга пользователей.
+ * Загружает данные пользователей из Firestore, сортирует их по рейтинговым баллам
+ * и отображает в RecyclerView с использованием ReytingAdapter.
+ */
 public class ReytingFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private ReytingAdapter ReytingAdapter;
+    private ReytingAdapter reytingAdapter;
     private List<User> userList;
 
+    /**
+     * Создает представление фрагмента, инициализирует RecyclerView
+     * и загружает список пользователей.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frame_reyting, container, false);
@@ -29,12 +41,16 @@ public class ReytingFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         userList = new ArrayList<>();
-        ReytingAdapter = new ReytingAdapter(userList);
-        recyclerView.setAdapter(ReytingAdapter);
+        reytingAdapter = new ReytingAdapter(userList);
+        recyclerView.setAdapter(reytingAdapter);
         loadUsers();
         return view;
     }
 
+    /**
+     * Загружает данные пользователей из Firestore, сортирует их по рейтинговым баллам
+     * и обновляет адаптер.
+     */
     private void loadUsers() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("users")
@@ -57,7 +73,7 @@ public class ReytingFragment extends Fragment {
 
                     Collections.sort(userList, (user1, user2) -> Integer.compare(user2.getReytingPoints(), user1.getReytingPoints()));
 
-                    ReytingAdapter.notifyDataSetChanged();
+                    reytingAdapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(requireActivity(), "Ошибка загрузки пользователей: " + e.getMessage(), Toast.LENGTH_SHORT).show();

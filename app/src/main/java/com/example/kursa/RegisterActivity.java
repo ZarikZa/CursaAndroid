@@ -7,23 +7,30 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * RegisterActivity — активность для регистрации нового пользователя.
+ * Проверяет корректность введенных данных (никнейм, логин, пароль, email),
+ * обеспечивает уникальность никнейма и логина, сохраняет данные в Firestore
+ * и добавляет пользователю доступные уровни.
+ */
 public class RegisterActivity extends AppCompatActivity {
     private ImageButton back;
     private EditText nicknameEditText, usernameEditText, passwordEditText, emailEditText;
     private FirebaseFirestore db;
     private Button registr;
 
+    /**
+     * Инициализирует активность, настраивает интерфейс и обработчики событий.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +50,9 @@ public class RegisterActivity extends AppCompatActivity {
         registr.setOnClickListener(v -> onRegisterButtonClick());
     }
 
+    /**
+     * Обрабатывает нажатие кнопки регистрации, проверяет поля и запускает процесс регистрации.
+     */
     public void onRegisterButtonClick() {
         String nickname = nicknameEditText.getText().toString();
         String username = usernameEditText.getText().toString();
@@ -72,6 +82,25 @@ public class RegisterActivity extends AppCompatActivity {
         checkNicknameAvailability(nickname, username, password, email);
     }
 
+    /**
+     * Проверяет валидность email по регулярному выражению.
+     *
+     * @param email Введенный email
+     * @return true, если email валиден, иначе false
+     */
+    private boolean isEmailValid(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
+
+    /**
+     * Проверяет доступность никнейма в Firestore.
+     *
+     * @param nickname Никнейм для проверки
+     * @param username Логин пользователя
+     * @param password Пароль пользователя
+     * @param email    Email пользователя
+     */
     private void checkNicknameAvailability(String nickname, String username, String password, String email) {
         db.collection("users")
                 .whereEqualTo("nickname", nickname)
@@ -88,6 +117,14 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Проверяет доступность логина в Firestore и валидность пароля.
+     *
+     * @param username Логин для проверки
+     * @param password Пароль пользователя
+     * @param nickname Никнейм пользователя
+     * @param email    Email пользователя
+     */
     private void checkUsernameAvailability(String username, String password, String nickname, String email) {
         db.collection("users")
                 .whereEqualTo("login", username)
@@ -108,6 +145,14 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Добавляет нового пользователя в Firestore и инициализирует его уровни.
+     *
+     * @param nickname Никнейм пользователя
+     * @param username Логин пользователя
+     * @param password Пароль пользователя
+     * @param email    Email пользователя
+     */
     private void addUserToDatabase(String nickname, String username, String password, String email) {
         Map<String, Object> user = new HashMap<>();
         user.put("nickname", nickname);
@@ -132,6 +177,11 @@ public class RegisterActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Добавляет доступные уровни для нового пользователя в Firestore.
+     *
+     * @param nickname Никнейм пользователя
+     */
     private void addLevelsForUser(String nickname) {
         db.collection("levelsAll")
                 .get()
@@ -141,52 +191,45 @@ public class RegisterActivity extends AppCompatActivity {
                     userLevels.put("levels", levelsList);
 
                     for (DocumentSnapshot levelDoc : querySnapshot.getDocuments()) {
-                        // Получаем данные уровня
                         Map<String, Object> levelData = levelDoc.getData();
                         if (levelData == null) continue;
 
-                        // Получаем details из документа
                         Map<String, Object> detailsMap = (Map<String, Object>) levelData.get("details");
                         if (detailsMap == null) {
                             detailsMap = new HashMap<>();
                         }
 
-                        // Создаем структуру для сохранения
                         Map<String, Object> level = new HashMap<>();
                         level.put("levelName", levelData.get("levelName"));
                         level.put("levelId", levelData.get("levelId"));
 
-                        // Копируем details как есть
                         Map<String, Object> newDetails = new HashMap<>();
-                        newDetails.put("isUnlocked", levelDoc.getId().equals("level1")); // Разблокируем только level1
-                        newDetails.put("words", detailsMap.get("words")); // Копируем слова
+                        newDetails.put("isUnlocked", levelDoc.getId().equals("level1"));
+                        newDetails.put("words", detailsMap.get("words"));
 
                         level.put("details", newDetails);
                         levelsList.add(level);
                     }
 
-                    // Сохраняем в коллекцию levels
                     db.collection("levels")
                             .document(nickname)
                             .set(userLevels)
-                            .addOnSuccessListener(aVoid -> {
-                                Log.d("RegisterActivity", "Уровни успешно добавлены для пользователя " + nickname);
-                            })
+                            .addOnSuccessListener(aVoid -> {})
                             .addOnFailureListener(e -> {
-                                Log.e("RegisterActivity", "Ошибка при добавлении уровней", e);
-                                Toast.makeText(RegisterActivity.this,
-                                        "Ошибка при добавлении уровней",
-                                        Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RegisterActivity.this, "Ошибка при добавлении уровней", Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("RegisterActivity", "Ошибка при загрузке уровней", e);
-                    Toast.makeText(RegisterActivity.this,
-                            "Ошибка при загрузке уровней",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Ошибка при загрузке уровней", Toast.LENGTH_SHORT).show();
                 });
     }
 
+    /**
+     * Проверяет валидность пароля по заданным критериям.
+     *
+     * @param password Пароль для проверки
+     * @return true, если пароль валиден, иначе false
+     */
     private boolean isPasswordValid(String password) {
         if (password.length() <= 8) {
             Toast.makeText(this, "Пароль должен быть больше 8 символов", Toast.LENGTH_SHORT).show();
@@ -205,10 +248,5 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
         return true;
-    }
-
-    private boolean isEmailValid(String email) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        return email.matches(emailRegex);
     }
 }

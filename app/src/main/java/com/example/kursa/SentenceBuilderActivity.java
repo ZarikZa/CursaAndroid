@@ -1,7 +1,6 @@
 package com.example.kursa;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -14,7 +13,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * SentenceBuilderActivity — активность для сборки предложений на английском языке.
+ * Позволяет пользователю составлять перевод русского предложения, выбирая слова из предложенного набора.
+ * Использует Firestore для загрузки данных уровня и проверяет правильность собранного предложения.
+ */
 public class SentenceBuilderActivity extends AppCompatActivity {
 
     private TextView russianSentenceTextView;
@@ -31,12 +34,16 @@ public class SentenceBuilderActivity extends AppCompatActivity {
     private int currentSentenceIndex = 0;
     private ImageButton backBtm;
 
+    /**
+     * Инициализирует активность, настраивает элементы интерфейса и загружает данные уровня.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sentence_builder);
 
-        // Инициализация элементов
         russianSentenceTextView = findViewById(R.id.russianSentenceTextView);
         selectedWordsRecyclerView = findViewById(R.id.selectedWordsRecyclerView);
         availableWordsRecyclerView = findViewById(R.id.availableWordsRecyclerView);
@@ -44,7 +51,6 @@ public class SentenceBuilderActivity extends AppCompatActivity {
         backBtm = findViewById(R.id.backButton);
         db = FirebaseFirestore.getInstance();
 
-        // Настройка RecyclerView
         selectedWordsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         availableWordsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
@@ -54,25 +60,24 @@ public class SentenceBuilderActivity extends AppCompatActivity {
         selectedWordsRecyclerView.setAdapter(selectedWordsAdapter);
         availableWordsRecyclerView.setAdapter(availableWordsAdapter);
 
-        // Получение данных из Intent
         levelId = getIntent().getStringExtra("levelId");
         nickname = getIntent().getStringExtra("nickname");
         if (levelId == null) {
-            Toast.makeText(this, "Level ID is missing", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Отсутствует ID уровня", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        backBtm.setOnClickListener(v -> {
-            finish();
-        });
+        backBtm.setOnClickListener(v -> finish());
 
-        // Загрузка уровня
         loadLevel();
 
         checkButton.setOnClickListener(v -> checkTranslation());
     }
 
+    /**
+     * Загружает данные уровня из Firestore.
+     */
     private void loadLevel() {
         db.collection("sentenceLevels")
                 .document(levelId)
@@ -81,23 +86,27 @@ public class SentenceBuilderActivity extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         sentences = (List<Map<String, Object>>) documentSnapshot.get("sentences");
                         if (sentences != null && sentences.size() == 5) {
-                            Toast.makeText(this, "Sentences loaded: " + sentences.size(), Toast.LENGTH_SHORT).show();
                             loadSentence(currentSentenceIndex);
                         } else {
-                            Toast.makeText(this, "Invalid level data: " + (sentences == null ? "null" : sentences.size()), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Неверные данные уровня", Toast.LENGTH_SHORT).show();
                             finish();
                         }
                     } else {
-                        Toast.makeText(this, "Level not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Уровень не найден", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ошибка: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     finish();
                 });
     }
 
+    /**
+     * Загружает предложение по указанному индексу и подготавливает слова для сборки.
+     *
+     * @param index Индекс предложения
+     */
     private void loadSentence(int index) {
         Map<String, Object> sentence = sentences.get(index);
         String russianText = (String) sentence.get("russian");
@@ -112,17 +121,17 @@ public class SentenceBuilderActivity extends AppCompatActivity {
                 availableWords.add(new WordBuild(word));
             }
             Collections.shuffle(availableWords);
-            Toast.makeText(this, "Words added: " + availableWords.size(), Toast.LENGTH_SHORT).show();
-            Log.d("SentenceBuilder", "Available words: " + availableWords.toString());
-        } else {
-            Toast.makeText(this, "No words available for sentence " + index, Toast.LENGTH_SHORT).show();
         }
-        Log.d("SentenceBuilder", "Correct translation loaded: '" + correctTranslation + "'");
         availableWordsAdapter.updateWords(availableWords);
         selectedWordsAdapter.updateWords(selectedWords);
         availableWordsRecyclerView.post(() -> availableWordsRecyclerView.requestLayout());
     }
 
+    /**
+     * Добавляет слово в выбранные для составления предложения.
+     *
+     * @param word Слово для добавления
+     */
     private void addWord(WordBuild word) {
         if (!word.isSelected()) {
             word.setSelected(true);
@@ -132,6 +141,11 @@ public class SentenceBuilderActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Удаляет слово из выбранных.
+     *
+     * @param word Слово для удаления
+     */
     private void removeWord(WordBuild word) {
         word.setSelected(false);
         selectedWords.remove(word);
@@ -139,6 +153,10 @@ public class SentenceBuilderActivity extends AppCompatActivity {
         availableWordsAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Проверяет правильность собранного предложения и переходит к следующему,
+     * если ответ верный, или сбрасывает выбор, если ошибочный.
+     */
     private void checkTranslation() {
         StringBuilder userTranslation = new StringBuilder();
         for (WordBuild word : selectedWords) {
@@ -146,20 +164,17 @@ public class SentenceBuilderActivity extends AppCompatActivity {
         }
         String userAnswer = userTranslation.toString().trim().toLowerCase();
         String normalizedCorrectTranslation = correctTranslation.trim().toLowerCase();
-        Log.d("SentenceBuilder", "User answer: '" + userAnswer + "'");
-        Log.d("SentenceBuilder", "Correct translation: '" + normalizedCorrectTranslation + "'");
 
         if (userAnswer.equals(normalizedCorrectTranslation)) {
-            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
             currentSentenceIndex++;
             if (currentSentenceIndex < 5) {
                 loadSentence(currentSentenceIndex);
             } else {
-                Toast.makeText(this, "Level completed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Уровень завершен!", Toast.LENGTH_SHORT).show();
                 finish();
             }
         } else {
-            Toast.makeText(this, "Wrong! Correct answer: " + correctTranslation, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Неправильно! Правильный ответ: " + correctTranslation, Toast.LENGTH_LONG).show();
             selectedWords.clear();
             for (WordBuild word : availableWords) {
                 word.setSelected(false);

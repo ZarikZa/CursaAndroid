@@ -13,7 +13,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+/**
+ * DialogueEditActivity — активность для редактирования или удаления существующего диалога в Firestore.
+ * Позволяет изменить ID диалога, имя персонажа, пять фраз и по три варианта ответа для каждой.
+ * Загружает существующие данные диалога, выполняет валидацию и сохраняет изменения или удаляет диалог.
+ */
 public class DialogueEditActivity extends AppCompatActivity {
 
     private TextInputEditText dialogueIdEditText, characterEditText;
@@ -23,12 +27,17 @@ public class DialogueEditActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String dialogueId;
 
+    /**
+     * Инициализирует активность, устанавливает layout, связывает элементы интерфейса,
+     * загружает данные диалога по ID и настраивает обработчики для кнопок.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialogue_edit);
 
-        // Инициализация элементов
         dialogueIdEditText = findViewById(R.id.dialogueIdEditText);
         characterEditText = findViewById(R.id.characterEditText);
 
@@ -71,6 +80,9 @@ public class DialogueEditActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(v -> deleteDialogue());
     }
 
+    /**
+     * Загружает данные диалога из Firestore по ID и заполняет поля ввода.
+     */
     private void loadDialogueData() {
         db.collection("dialogues").document(dialogueId)
                 .get()
@@ -96,14 +108,18 @@ public class DialogueEditActivity extends AppCompatActivity {
                             }
                         }
                     } else {
-                        Toast.makeText(this, "Dialogue not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Диалог не найден", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading dialogue: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ошибка загрузки диалога: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
+    /**
+     * Собирает данные из полей ввода, выполняет валидацию (пустота, английский язык, уникальность)
+     * и сохраняет обновленный диалог в Firestore.
+     */
     private void saveDialogue() {
         String dialogueId = dialogueIdEditText.getText().toString().trim();
         String character = characterEditText.getText().toString().trim();
@@ -111,7 +127,6 @@ public class DialogueEditActivity extends AppCompatActivity {
         String[] phraseTexts = new String[5];
         String[][] phraseOptions = new String[5][3];
 
-        // Сбор данных из полей
         for (int i = 0; i < 5; i++) {
             phraseTexts[i] = phraseTextEditTexts[i].getText().toString().trim();
             for (int j = 0; j < 3; j++) {
@@ -119,48 +134,42 @@ public class DialogueEditActivity extends AppCompatActivity {
             }
         }
 
-        // Проверка на пустые поля
         if (dialogueId.isEmpty() || character.isEmpty()) {
-            Toast.makeText(this, "Please fill in Dialogue ID and Character", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Пожалуйста, заполните ID диалога и имя персонажа", Toast.LENGTH_SHORT).show();
             return;
         }
         for (int i = 0; i < 5; i++) {
             if (phraseTexts[i].isEmpty() || phraseOptions[i][0].isEmpty() ||
                     phraseOptions[i][1].isEmpty() || phraseOptions[i][2].isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields for Phrase " + (i + 1), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Пожалуйста, заполните все поля для фразы " + (i + 1), Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка, что фразы на английском
         for (int i = 0; i < 5; i++) {
             if (!phraseTexts[i].matches("^[a-zA-Z\\s.,!?'-]+$")) {
-                Toast.makeText(this, "Phrase " + (i + 1) + " must be in English", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Фраза " + (i + 1) + " должна быть на английском языке", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка уникальности и английского языка для вариантов ответа
         for (int i = 0; i < 5; i++) {
             Set<String> optionsSet = new HashSet<>();
             for (int j = 0; j < 3; j++) {
                 String option = phraseOptions[i][j];
 
-                // Проверка на английский язык
                 if (!option.matches("^[a-zA-Z\\s.,!?'-]+$")) {
-                    Toast.makeText(this, "Phrase " + (i + 1) + " Option " + (j + 1) + " must be in English", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Фраза " + (i + 1) + ", вариант " + (j + 1) + " должен быть на английском языке", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Проверка на уникальность
                 if (!optionsSet.add(option)) {
-                    Toast.makeText(this, "Phrase " + (i + 1) + " has duplicate options", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Фраза " + (i + 1) + " содержит повторяющиеся варианты", Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
         }
 
-        // Формируем данные
         Map<String, Object> dialogueData = new HashMap<>();
         dialogueData.put("character", character);
 
@@ -169,7 +178,7 @@ public class DialogueEditActivity extends AppCompatActivity {
             Map<String, Object> phrase = new HashMap<>();
             phrase.put("text", phraseTexts[i]);
             List<Map<String, Object>> answers = new ArrayList<>();
-            answers.add(createAnswer(phraseOptions[i][0], true)); // Option 1 - правильный
+            answers.add(createAnswer(phraseOptions[i][0], true));
             answers.add(createAnswer(phraseOptions[i][1], false));
             answers.add(createAnswer(phraseOptions[i][2], false));
             phrase.put("answers", answers);
@@ -178,22 +187,23 @@ public class DialogueEditActivity extends AppCompatActivity {
 
         dialogueData.put("options", options);
 
-        // Сохранение в Firestore
         db.collection("dialogues")
                 .document(dialogueId)
                 .set(dialogueData)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Dialogue saved successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Диалог успешно сохранен", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error saving dialogue: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ошибка при сохранении диалога: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
+    /**
+     * Удаляет диалог из Firestore по его ID.
+     */
     private void deleteDialogue() {
         if (dialogueId == null) {
-            Toast.makeText(this, "No dialogue to delete", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -201,14 +211,20 @@ public class DialogueEditActivity extends AppCompatActivity {
                 .document(dialogueId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Dialogue deleted successfully", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error deleting dialogue: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ошибка при удалении диалога: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
+    /**
+     * Создает объект ответа с текстом и флагом правильности.
+     *
+     * @param text      Текст ответа
+     * @param isCorrect Флаг, указывающий, правильный ли ответ
+     * @return Карта с данными ответа
+     */
     private Map<String, Object> createAnswer(String text, boolean isCorrect) {
         Map<String, Object> answer = new HashMap<>();
         answer.put("text", text);

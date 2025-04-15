@@ -34,7 +34,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+/**
+ * LevelActivActivity — активность для изучения слов на заданном уровне.
+ * Позволяет пользователю взаимодействовать со словами через свайпы (вправо — изучено, влево — сложное),
+ * проверять перевод, просматривать перевод слова и завершать уровень. Сохраняет прогресс в Firestore.
+ */
 public class LevelActivActivity extends AppCompatActivity {
     private static final String TAG = "LevelActivActivity";
 
@@ -53,6 +57,12 @@ public class LevelActivActivity extends AppCompatActivity {
     private String levelName, nickname;
     private GestureDetector gestureDetector;
 
+    /**
+     * Инициализирует активность, устанавливает layout, локализацию,
+     * элементы интерфейса, обработчики событий и загружает данные уровня.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +73,9 @@ public class LevelActivActivity extends AppCompatActivity {
         loadLevelData();
     }
 
+    /**
+     * Устанавливает локализацию на русский язык.
+     */
     private void setupLocale() {
         Locale locale = new Locale("ru");
         Locale.setDefault(locale);
@@ -71,6 +84,9 @@ public class LevelActivActivity extends AppCompatActivity {
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
     }
 
+    /**
+     * Инициализирует элементы интерфейса.
+     */
     private void initializeViews() {
         db = FirebaseFirestore.getInstance();
         draggableView = findViewById(R.id.draggable_view);
@@ -89,6 +105,9 @@ public class LevelActivActivity extends AppCompatActivity {
         gestureDetector = new GestureDetector(this, new GestureListener());
     }
 
+    /**
+     * Настраивает обработчики событий для элементов интерфейса.
+     */
     private void setupListeners() {
         back.setOnClickListener(v -> finish());
 
@@ -100,6 +119,9 @@ public class LevelActivActivity extends AppCompatActivity {
         draggableView.setOnTouchListener((v, event) -> handleDragEvent(event));
     }
 
+    /**
+     * Загружает данные уровня из Intent.
+     */
     private void loadLevelData() {
         Intent intent = getIntent();
         nickname = intent.getStringExtra("nickname");
@@ -113,12 +135,18 @@ public class LevelActivActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Показывает поле для ввода перевода.
+     */
     private void showTranslationInput() {
         linearBtm.setVisibility(View.GONE);
         inputTranslationEditText.setVisibility(View.VISIBLE);
         checkTranslationButton.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Показывает перевод текущего слова.
+     */
     private void showTranslation() {
         linearBtm.setVisibility(View.GONE);
         if (!unlearnedWords.isEmpty()) {
@@ -127,31 +155,38 @@ public class LevelActivActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Проверяет введенный пользователем перевод.
+     */
     private void checkTranslation() {
         String userInput = inputTranslationEditText.getText().toString().trim();
         Word currentWord = unlearnedWords.get(currentIndex);
 
         if (userInput.equalsIgnoreCase(currentWord.getTranslation())) {
             animateBackgroundColor(inputTranslationEditText, Color.GREEN);
-            showToast("Правильно!");
         } else {
             animateBackgroundColor(inputTranslationEditText, Color.RED);
             showToast("Неправильно! Правильный перевод: " + currentWord.getTranslation());
         }
     }
 
+    /**
+     * Завершает уровень и сохраняет прогресс.
+     */
     private void completeLevelAndFinish() {
         addLearnedWordsToFirestore(nickname);
         completeLevel();
     }
 
+    /**
+     * Обновляет содержимое интерфейса в зависимости от текущего слова.
+     */
     private void updateContent() {
         if (unlearnedWords.isEmpty()) {
             new android.os.Handler().postDelayed(() -> {
                 draggableView.setEnabled(false);
                 draggableView.setAlpha(0.5f);
                 contentTextView.setText("Вы изучили все слова!");
-                showToast("Обучение завершено");
                 linearBtm.setVisibility(View.GONE);
                 translationTextView.setVisibility(View.GONE);
                 completeButton.setVisibility(View.VISIBLE);
@@ -168,6 +203,9 @@ public class LevelActivActivity extends AppCompatActivity {
         resetUIElements();
     }
 
+    /**
+     * Сбрасывает состояние элементов интерфейса.
+     */
     private void resetUIElements() {
         draggableView.setEnabled(true);
         draggableView.setAlpha(1.0f);
@@ -179,6 +217,12 @@ public class LevelActivActivity extends AppCompatActivity {
         inputTranslationEditText.setText("");
     }
 
+    /**
+     * Обрабатывает события касания для перетаскивания.
+     *
+     * @param event Событие касания
+     * @return true, если событие обработано
+     */
     private boolean handleDragEvent(MotionEvent event) {
         gestureDetector.onTouchEvent(event);
 
@@ -193,6 +237,12 @@ public class LevelActivActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Обрабатывает начало перетаскивания.
+     *
+     * @param event Событие касания
+     * @return true, если перетаскивание начато
+     */
     private boolean handleActionDown(MotionEvent event) {
         if (draggableView.isEnabled()) {
             initialX = draggableView.getX();
@@ -203,6 +253,12 @@ public class LevelActivActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Обрабатывает перемещение при перетаскивании.
+     *
+     * @param event Событие касания
+     * @return true, если перемещение обработано
+     */
     private boolean handleActionMove(MotionEvent event) {
         if (draggableView.isEnabled()) {
             float newX = event.getRawX() - draggableView.getWidth() / 2;
@@ -217,6 +273,11 @@ public class LevelActivActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Обновляет цвета кнопок в зависимости от положения перетаскиваемого элемента.
+     *
+     * @param newX Новая X-координата
+     */
     private void updateButtonColors(float newX) {
         if (newX > previousX - 350) {
             rightButton.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green));
@@ -229,6 +290,11 @@ public class LevelActivActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Обрабатывает завершение перетаскивания.
+     *
+     * @return true, если завершение обработано
+     */
     private boolean handleActionUp() {
         if (draggableView.isEnabled()) {
             animateDraggableViewToInitialPosition();
@@ -237,6 +303,9 @@ public class LevelActivActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Анимирует возврат перетаскиваемого элемента в исходное положение.
+     */
     private void animateDraggableViewToInitialPosition() {
         draggableView.animate()
                 .x(initialX)
@@ -250,9 +319,13 @@ public class LevelActivActivity extends AppCompatActivity {
                 .start();
     }
 
+    /**
+     * Сохраняет изученные слова в Firestore.
+     *
+     * @param nickname Никнейм пользователя
+     */
     private void addLearnedWordsToFirestore(String nickname) {
         if (learnedWords.isEmpty()) {
-            showToast("Нет изученных слов для добавления");
             return;
         }
 
@@ -268,6 +341,12 @@ public class LevelActivActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Обновляет слова в Firestore.
+     *
+     * @param userRef  Ссылка на документ пользователя
+     * @param document Документ с существующими данными
+     */
     private void updateWordsInFirestore(DocumentReference userRef, DocumentSnapshot document) {
         Map<String, Object> existingWords = document.exists() ?
                 (Map<String, Object>) document.get("words") : new HashMap<>();
@@ -278,17 +357,21 @@ public class LevelActivActivity extends AppCompatActivity {
 
         if (document.exists()) {
             userRef.update("words", existingWords)
-                    .addOnSuccessListener(aVoid -> showToast("Изученные слова обновлены"))
                     .addOnFailureListener(e -> showToast("Ошибка при обновлении слов: " + e.getMessage()));
         } else {
             Map<String, Object> data = new HashMap<>();
             data.put("words", existingWords);
             userRef.set(data)
-                    .addOnSuccessListener(aVoid -> showToast("Изученные слова добавлены"))
                     .addOnFailureListener(e -> showToast("Ошибка при создании словаря: " + e.getMessage()));
         }
     }
 
+    /**
+     * Обновляет данные слова в словаре.
+     *
+     * @param existingWords Существующие слова
+     * @param word          Слово для обновления
+     */
     private void updateWordData(Map<String, Object> existingWords, WordLevel word) {
         Map<String, Object> wordData = new HashMap<>();
         wordData.put("translation", word.getTranslation());
@@ -304,17 +387,18 @@ public class LevelActivActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Завершает уровень и разблокирует следующий.
+     */
     private void completeLevel() {
         Level currentLevel = (Level) getIntent().getSerializableExtra("level");
         if (currentLevel == null) {
-            showToast("Ошибка: данные уровня не найдены");
             return;
         }
 
         String currentLevelName = currentLevel.getLevelName();
         int currentLevelNumber = extractLevelNumber(currentLevelName);
         if (currentLevelNumber == -1) {
-            showToast("Ошибка: не удалось определить номер уровня");
             return;
         }
 
@@ -323,10 +407,15 @@ public class LevelActivActivity extends AppCompatActivity {
         db.collection("levels")
                 .document(nickname)
                 .get()
-                .addOnSuccessListener(documentSnapshot -> handleLevelCompletion(documentSnapshot, nextLevelName))
-                .addOnFailureListener(e -> showToast("Ошибка при получении данных: " + e.getMessage()));
+                .addOnSuccessListener(documentSnapshot -> handleLevelCompletion(documentSnapshot, nextLevelName));
     }
 
+    /**
+     * Обрабатывает завершение уровня и разблокировку следующего.
+     *
+     * @param documentSnapshot Документ с данными уровней
+     * @param nextLevelName   Название следующего уровня
+     */
     private void handleLevelCompletion(DocumentSnapshot documentSnapshot, String nextLevelName) {
         if (!documentSnapshot.exists()) {
             showToast("Ошибка: данные пользователя не найдены");
@@ -351,27 +440,39 @@ public class LevelActivActivity extends AppCompatActivity {
         if (nextLevelFound) {
             unlockNextLevel(levels);
         } else {
-            showToast("Это последний уровень. Поздравляем!");
             setResultAndFinish();
         }
     }
 
+    /**
+     * Разблокирует следующий уровень в Firestore.
+     *
+     * @param levels Список уровней
+     */
     private void unlockNextLevel(List<Map<String, Object>> levels) {
         db.collection("levels")
                 .document(nickname)
                 .update("levels", levels)
                 .addOnSuccessListener(aVoid -> {
-                    showToast("Следующий уровень разблокирован!");
                     setResultAndFinish();
                 })
                 .addOnFailureListener(e -> showToast("Ошибка при разблокировке: " + e.getMessage()));
     }
 
+    /**
+     * Устанавливает результат и завершает активность.
+     */
     private void setResultAndFinish() {
         setResult(RESULT_OK);
         finish();
     }
 
+    /**
+     * Извлекает номер уровня из названия.
+     *
+     * @param levelName Название уровня
+     * @return Номер уровня или -1 при ошибке
+     */
     private int extractLevelNumber(String levelName) {
         try {
             Pattern pattern = Pattern.compile("\\d+");
@@ -383,6 +484,12 @@ public class LevelActivActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Анимирует изменение цвета фона элемента.
+     *
+     * @param view       Элемент для анимации
+     * @param targetColor Целевой цвет
+     */
     private void animateBackgroundColor(View view, int targetColor) {
         ValueAnimator colorAnimator = ValueAnimator.ofArgb(Color.TRANSPARENT, targetColor);
         colorAnimator.setDuration(500);
@@ -391,14 +498,31 @@ public class LevelActivActivity extends AppCompatActivity {
         colorAnimator.start();
     }
 
+    /**
+     * Показывает уведомление.
+     *
+     * @param message Сообщение для отображения
+     */
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Класс для обработки жестов свайпа.
+     */
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         private static final int SWIPE_THRESHOLD = 100;
         private static final int SWIPE_VELOCITY_THRESHOLD = 100;
 
+        /**
+         * Обрабатывает жест свайпа.
+         *
+         * @param e1        Первое событие касания
+         * @param e2        Второе событие касания
+         * @param velocityX Скорость по оси X
+         * @param velocityY Скорость по оси Y
+         * @return true, если свайп обработан
+         */
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (!draggableView.isEnabled()) return false;
@@ -411,6 +535,11 @@ public class LevelActivActivity extends AppCompatActivity {
             return false;
         }
 
+        /**
+         * Обрабатывает свайп и обновляет списки слов.
+         *
+         * @param isRightSwipe Направление свайпа (true — вправо)
+         */
         private void handleSwipe(boolean isRightSwipe) {
             if (unlearnedWords.isEmpty()) return;
 
@@ -428,12 +557,16 @@ public class LevelActivActivity extends AppCompatActivity {
                 }
 
                 updateContent();
-                showToast(isRightSwipe ? "Слово добавлено в изученные" : "Слово помечено как сложное");
-            } else {
-                showToast("Слово уже изучено");
             }
         }
 
+        /**
+         * Проверяет наличие слова в списке.
+         *
+         * @param list Список слов
+         * @param word Слово для проверки
+         * @return true, если слово уже есть
+         */
         private boolean containsWord(List<WordLevel> list, WordLevel word) {
             for (WordLevel w : list) {
                 if (w.getEnglish().equals(word.getEnglish())) {
@@ -444,6 +577,12 @@ public class LevelActivActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Сохраняет количество изученных слов за день в Firestore.
+     *
+     * @param nickname         Никнейм пользователя
+     * @param wordsLearnedToday Количество изученных слов
+     */
     private void saveDailyWordCount(String nickname, int wordsLearnedToday) {
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         DocumentReference dailyRef = db.collection("dailyWordCount")
@@ -465,6 +604,13 @@ public class LevelActivActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Обновляет существующий счетчик слов.
+     *
+     * @param ref              Ссылка на документ
+     * @param document         Документ с данными
+     * @param wordsLearnedToday Количество новых слов
+     */
     private void updateExistingCount(DocumentReference ref, DocumentSnapshot document, int wordsLearnedToday) {
         Long currentCount = document.getLong("count");
         if (currentCount != null) {
@@ -473,6 +619,12 @@ public class LevelActivActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Создает новый счетчик слов.
+     *
+     * @param ref              Ссылка на документ
+     * @param wordsLearnedToday Количество слов
+     */
     private void createNewCount(DocumentReference ref, int wordsLearnedToday) {
         Map<String, Object> data = new HashMap<>();
         data.put("count", wordsLearnedToday);

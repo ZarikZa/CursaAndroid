@@ -1,0 +1,766 @@
+@startuml
+class com.example.kursa.UpdateDailyFragment {
+- {static} String TAG
+- FirebaseFirestore db
+- Parser parser
+- WordSelector wordSelector
+- FirestoreHelper firestoreHelper
+- RecyclerView learnedWordsList
+- WordAdapter2 wordAdapter
+- List<Word> wordList
++ void onCreate(Bundle)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void updateWordsAndRefresh()
+- void loadDailyWordsFromFirebase()
+}
+
+
+class com.example.kursa.WordAdapter2 {
+- List<Word> wordList
++ ViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(ViewHolder,int)
++ int getItemCount()
+}
+
+
+class com.example.kursa.WordAdapter2$ViewHolder {
++ TextView englishWordTextView
++ TextView translationTextView
+}
+
+class com.example.kursa.LevelsFragment {
+- {static} String TAG
+- {static} int LEVEL_ACTIVITY_REQUEST_CODE
+- RecyclerView recyclerView
+- LevelsAdapter levelsAdapter
+- List<Level> levels
+- FirebaseFirestore db
+- String userNickname
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void initializeViews(View)
+- void setupRecyclerView()
+- void loadLevels()
+- void processLevelsData(DocumentSnapshot)
+- Level createLevelFromData(Map<String,Object>)
+- void handleLoadError(Exception)
+- void showToast(String)
++ void onActivityResult(int,int,Intent)
+}
+
+
+class com.example.kursa.ChatMessage {
+- String sender
+- String message
++ String getSender()
++ String getMessage()
+}
+
+
+class com.example.kursa.LevelsAdapter {
+- List<Level> levels
+- OnLevelClickListener onLevelClickListener
++ LevelViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(LevelViewHolder,int)
++ int getItemCount()
+}
+
+
+class com.example.kursa.LevelsAdapter$LevelViewHolder {
+- Button levelButton
+- OnLevelClickListener onLevelClickListener
++ void bind(Level)
+}
+
+
+interface com.example.kursa.LevelsAdapter$OnLevelClickListener {
+~ void onLevelClick(Level)
+}
+
+class com.example.kursa.DialogueEditActivity {
+- TextInputEditText dialogueIdEditText
+- TextInputEditText[] phraseTextEditTexts
+- TextInputEditText[][] phraseOptionEditTexts
+- Button saveButton
+- FirebaseFirestore db
+- String dialogueId
+# void onCreate(Bundle)
+- void loadDialogueData()
+- void saveDialogue()
+- void deleteDialogue()
+- Map<String,Object> createAnswer(String,boolean)
+}
+
+
+class com.example.kursa.NavigationAdminActivity {
+- BottomNavigationView bottomNavigationView
+- String nickname
+# void onCreate(Bundle)
++ void setFragment(Fragment)
+}
+
+
+class com.example.kursa.ChatAdapter {
+- List<ChatMessage> messages
++ ChatViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(ChatViewHolder,int)
++ int getItemCount()
++ void addMessage(ChatMessage)
+}
+
+
+class com.example.kursa.ChatAdapter$ChatViewHolder {
+~ TextView senderTextView
+}
+
+class com.example.kursa.MainActivity {
+- {static} String PREFS_NAME
+- {static} String KEY_USERNAME
+- {static} String KEY_PASSWORD
+- {static} String KEY_REMEMBER
+- {static} String KEY_ROLE
+- Button enter
+- Button regist
+- TextView forgotPass
+- EditText usernameEditText
+- FirebaseFirestore db
+- SharedPreferences sharedPreferences
+# void onCreate(Bundle)
++ void onLoginButtonClick()
+- void clearSavedCredentials()
+}
+
+
+class com.example.kursa.ReytingAdapter {
+- List<User> users
++ UserViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(UserViewHolder,int)
++ int getItemCount()
+}
+
+
+class com.example.kursa.ReytingAdapter$UserViewHolder {
+- TextView nicknameTextView
+- TextView pointsTextView
++ void bind(User)
+}
+
+
+class com.example.kursa.DialogueActivity {
+- RecyclerView chatRecyclerView
+- Button option1Button
+- ChatAdapter chatAdapter
+- FirebaseFirestore db
+- String userId
+- String dialogueId
+- int currentStep
+- List<Map<String,Object>> dialogueOptions
+- String character
+- ImageButton backBtm
+# void onCreate(Bundle)
+- void loadDialogue()
+- void displayStep(int)
+- void showOptions(List<Map<String,Object>>)
+- void handleChoice(int,String,boolean,List<Map<String,Object>>)
+}
+
+
+class com.example.kursa.LevelAddActivity {
+- TextInputEditText levelIdEditText
+- TextInputEditText russian1EditText
+- TextInputEditText russian2EditText
+- TextInputEditText russian3EditText
+- TextInputEditText russian4EditText
+- TextInputEditText russian5EditText
+- Button saveButton
+- FirebaseFirestore db
+- {static} List<String> EXTRA_WORDS
+# void onCreate(Bundle)
+- void saveLevel()
+}
+
+
+class com.example.kursa.DialogueAddActivity {
+- EditText dialogueIdEditText
+- EditText[] phraseTextEditTexts
+- EditText[][] phraseOptionEditTexts
+- Button saveButton
+- FirebaseFirestore db
+# void onCreate(Bundle)
+- void saveDialogue()
+- Map<String,Object> createAnswer(String,boolean)
+}
+
+
+class com.example.kursa.WordAdapterBuild {
+- List<WordBuild> words
+- OnWordClickListener listener
++ WordViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(WordViewHolder,int)
++ int getItemCount()
++ void updateWords(List<WordBuild>)
+}
+
+
+class com.example.kursa.WordAdapterBuild$WordViewHolder {
+~ TextView wordTextView
+}
+
+interface com.example.kursa.WordAdapterBuild$OnWordClickListener {
+~ void onWordClick(WordBuild)
+}
+
+class com.example.kursa.WordBuild {
+- String text
+- boolean isSelected
++ String getText()
++ boolean isSelected()
++ void setSelected(boolean)
+}
+
+
+class com.example.kursa.LevelMainListFragment {
+- LinearLayout levelContainer
+- Button addLevelButton
+- FirebaseFirestore db
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadLevels()
++ void onResume()
+}
+
+
+class com.example.kursa.Word {
+- String english
+- String translation
++ String getEnglish()
++ String getTranslation()
+}
+
+
+class com.example.kursa.Level {
+- String levelName
+- List<Word> words
+- boolean isUnlocked
++ String getLevelName()
++ List<Word> getWords()
++ void setWords(List<Word>)
++ boolean isUnlocked()
+}
+
+
+class com.example.kursa.ReytingFragment {
+- RecyclerView recyclerView
+- ReytingAdapter reytingAdapter
+- List<User> userList
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadUsers()
+}
+
+
+class com.example.kursa.WordAdapter {
+- List<WordLevel> wordList
+- OnDeleteClickListener deleteClickListener
++ ViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(ViewHolder,int)
++ int getItemCount()
+}
+
+
+interface com.example.kursa.WordAdapter$OnDeleteClickListener {
+~ void onDeleteClick(WordLevel)
+}
+
+class com.example.kursa.WordAdapter$ViewHolder {
+- TextView englishWordTextView
+- TextView translationTextView
+- ImageButton deleteButton
++ void bind(WordLevel)
+}
+
+
+class com.example.kursa.ProfileFragment {
+- TextView loginTextView
+- LineChart wordCountChart
+- FirebaseFirestore db
+- Button logoutButton
+- String login
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void setupChart()
+- void fetchDailyWordCount(String,int)
+- void displayChart(Map<String,Integer>)
+- void showNoDataMessage(String)
+- void showLogoutConfirmationDialog()
+- void performLogout()
+- void fetchUserData(String)
+- void fetchWordsLearnedData(String)
+- void fetchRanking(String,long)
+}
+
+
+class com.example.kursa.User {
+- String nickname
+- String login
+- String password
+- int reytingPoints
++ String getNickname()
++ void setNickname(String)
++ String getlogin()
++ void setlogin(String)
++ String getPassword()
++ void setPassword(String)
++ int getReytingPoints()
++ void setReytingPoints(int)
+}
+
+
+class com.example.kursa.AddLevelFragment {
+- TextInputEditText levelNameEditText
+- TextInputEditText[] englishWords
+- TextInputEditText[] translations
+- Button addLevelButton
+- FirebaseFirestore db
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void addLevelToFirestore()
+- void resetFields()
+- void generateLevelId(OnLevelIdGeneratedListener)
+- void bindLevelToUsers(Map<String,Object>)
+}
+
+
+interface com.example.kursa.AddLevelFragment$OnLevelIdGeneratedListener {
+~ void onLevelIdGenerated(String)
+}
+
+class com.example.kursa.LevelEditActivity {
+- TextInputEditText levelIdEditText
+- TextInputEditText russian1EditText
+- TextInputEditText russian2EditText
+- TextInputEditText russian3EditText
+- TextInputEditText russian4EditText
+- TextInputEditText russian5EditText
+- Button saveButton
+- FirebaseFirestore db
+- String levelId
+- {static} List<String> EXTRA_WORDS
+# void onCreate(Bundle)
+- void loadLevelData()
+- void saveLevel()
+- void deleteLevel()
+}
+
+
+class com.example.kursa.DialogueSelectionFragment {
+- LinearLayout dialogueContainer
+- FirebaseFirestore db
+- String nickname
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void loadDialogues()
+}
+
+
+class com.example.kursa.TestActivity {
+- TextView contentTextView
+- TextView levelNameTextView
+- List<Word> unlearnedWords
+- int currentIndex
+- EditText inputTranslationEditText
+- Button checkTranslationButton
+- Button completeButton
+- FirebaseFirestore db
+- String levelName
+- String nickname
+- ImageButton back
+- int correctAnswers
+- int totalWords
+# void onCreate(Bundle)
+- void updateContent()
+- void checkTranslation()
+- void animateBackgroundColor(View,int)
+- void showResult()
+- void updateRatingPoints(int)
+- void setEditTextStyle(EditText)
+}
+
+
+class com.example.kursa.FirestoreHelper {
+- {static} String TAG
+- FirebaseFirestore db
+- UpdateListener updateListener
++ void setUpdateListener(UpdateListener)
++ void checkAndUpdateData(Parser,WordSelector)
+- void updateDailyWords(Parser,WordSelector,String)
+- void saveDailyWords(List<Word>,String)
+}
+
+
+interface com.example.kursa.FirestoreHelper$UpdateListener {
+~ void onUpdateComplete(boolean)
+}
+
+class com.example.kursa.RegisterActivity {
+- ImageButton back
+- EditText nicknameEditText
+- FirebaseFirestore db
+- Button registr
+# void onCreate(Bundle)
++ void onRegisterButtonClick()
+- boolean isEmailValid(String)
+- void checkNicknameAvailability(String,String,String,String)
+- void checkUsernameAvailability(String,String,String,String)
+- void addUserToDatabase(String,String,String,String)
+- void addLevelsForUser(String)
+- boolean isPasswordValid(String)
+}
+
+
+class com.example.kursa.ChangePasswordActivity {
+- EditText emailEditText
+- EditText verificationCodeEditText
+- EditText newPasswordEditText
+- EditText confirmNewPasswordEditText
+- Button sendCodeButton
+- ImageButton backButton
+- TextView loginTitle
+- FirebaseFirestore db
+- String userId
+- String verificationCode
+# void onCreate(Bundle)
+- void initializeViews()
+- void handleSendCode()
+- void checkEmailInFirestore(String)
+- void sendVerificationEmail(String)
+- void handleVerifyCode()
+- void handleChangePassword()
+- void updatePasswordInFirestore(String)
+- boolean isPasswordValid(String)
+- String generateVerificationCode()
+- boolean isNetworkConnected()
+- void showToast(String)
+}
+
+
+class com.example.kursa.WordSelector {
++ List<Word> getRandomWords(List<Word>,int)
+}
+
+class com.example.kursa.LevelActivActivity {
+- {static} String TAG
+- FrameLayout draggableView
+- TextView contentTextView
+- Button leftButton
+- LinearLayout linearBtm
+- List<Word> unlearnedWords
+- List<WordLevel> learnedWords
+- int currentIndex
+- EditText inputTranslationEditText
+- float initialX
+- float previousX
+- ImageButton proverkaBtm
+- FirebaseFirestore db
+- String levelName
+- GestureDetector gestureDetector
+# void onCreate(Bundle)
+- void setupLocale()
+- void initializeViews()
+- void setupListeners()
+- void loadLevelData()
+- void showTranslationInput()
+- void showTranslation()
+- void checkTranslation()
+- void completeLevelAndFinish()
+- void updateContent()
+- void resetUIElements()
+- boolean handleDragEvent(MotionEvent)
+- boolean handleActionDown(MotionEvent)
+- boolean handleActionMove(MotionEvent)
+- void updateButtonColors(float)
+- boolean handleActionUp()
+- void animateDraggableViewToInitialPosition()
+- void addLearnedWordsToFirestore(String)
+- void updateWordsInFirestore(DocumentReference,DocumentSnapshot)
+- void updateWordData(Map<String,Object>,WordLevel)
+- void completeLevel()
+- void handleLevelCompletion(DocumentSnapshot,String)
+- void unlockNextLevel(List<Map<String,Object>>)
+- void setResultAndFinish()
+- int extractLevelNumber(String)
+- void animateBackgroundColor(View,int)
+- void showToast(String)
+- void saveDailyWordCount(String,int)
+- void updateExistingCount(DocumentReference,DocumentSnapshot,int)
+- void createNewCount(DocumentReference,int)
+}
+
+
+class com.example.kursa.LevelActivActivity$GestureListener {
+- {static} int SWIPE_THRESHOLD
+- {static} int SWIPE_VELOCITY_THRESHOLD
++ boolean onFling(MotionEvent,MotionEvent,float,float)
+- void handleSwipe(boolean)
+- boolean containsWord(List<WordLevel>,WordLevel)
+}
+
+
+class com.example.kursa.ProfileAdminFragment {
+- TextView loginTextView
+- FirebaseFirestore db
+- Button logoutButton
+- String login
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void showLogoutConfirmationDialog()
+- void performLogout()
+- void fetchUserData(String)
+}
+
+
+class com.example.kursa.LevelMainAddActivity {
+- EditText levelNameEditText
+- EditText[] englishWords
+- EditText[] translations
+- Button addLevelButton
+- FirebaseFirestore db
+# void onCreate(Bundle)
+- void initializeViews()
+- void addLevelToFirestore()
+- Map<String,String> collectWordsData()
+- void createAndSaveLevel(String,String,Map<String,String>)
+- void distributeLevelToUsers(String,Map<String,Object>)
+- Task<Void> addLevelToUser(String,Map<String,Object>)
+- void generateLevelId(OnLevelIdGeneratedListener)
+}
+
+
+interface com.example.kursa.LevelMainAddActivity$OnLevelIdGeneratedListener {
+~ void onLevelIdGenerated(String)
+}
+
+class com.example.kursa.SentenceBuilderActivity {
+- TextView russianSentenceTextView
+- RecyclerView selectedWordsRecyclerView
+- Button checkButton
+- WordAdapterBuild selectedWordsAdapter
+- FirebaseFirestore db
+- List<WordBuild> availableWords
+- List<WordBuild> selectedWords
+- String correctTranslation
+- String levelId
+- String nickname
+- List<Map<String,Object>> sentences
+- int currentSentenceIndex
+- ImageButton backBtm
+# void onCreate(Bundle)
+- void loadLevel()
+- void loadSentence(int)
+- void addWord(WordBuild)
+- void removeWord(WordBuild)
+- void checkTranslation()
+}
+
+
+class com.example.kursa.LevelMainEditActivity {
+- EditText levelNameEditText
+- EditText[] englishWords
+- EditText[] translations
+- Button saveLevelButton
+- FirebaseFirestore db
+- String levelId
+# void onCreate(Bundle)
+- void initializeViews()
+- void loadLevelData()
+- void populateFields(DocumentSnapshot)
+- void saveLevelToFirestore()
+- Map<String,String> validateAndGetWords()
+- Map<String,Object> createLevelData(String,Map<String,String>,int)
+- void updateLevelInFirestore(Map<String,Object>)
+- Task<Void> updateUserLevel(String,Map<String,Object>)
+- List<Map<String,Object>> getLevelsListFromDoc(DocumentSnapshot)
+- void updateOrAddLevel(List<Map<String,Object>>,Map<String,Object>)
+- void createNewUserLevel(WriteBatch,String,Map<String,Object>)
+- void deleteLevel()
+- Task<Void> removeLevelFromAllUsers()
+- Task<Void> removeLevelFromUser(String)
+- void renumberLevels()
+- void updateAllUsersLevels(Map<String,String>)
+- void updateUserLevels(String,Map<String,String>)
+- int extractLevelNumber(String)
+}
+
+
+class com.example.kursa.DateHelper {
++ {static} String getTodayDate()
+}
+
+class com.example.kursa.DailyWordWorker {
++ Result doWork()
+}
+
+class com.example.kursa.LearnFragment {
+- TextView tvTimeRemaining
+- CountDownTimer countDownTimer
+- Button TenSlovBtm
+- String userNickname
+- List<Word> wordList
+- Button VseSlovaBtm
+- Button EzednevIspitBtm
+- LinearLayout levelsContainer
++ void onCreate(Bundle)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadLevels()
+- List<Word> getLastTenWords(List<Word>)
+- void loadWordsFromFirebase(OnWordsLoadedListener)
+- void loadDailyWordsFromFirebase(OnWordsLoadedListener)
+- void startDailyChallengeTimer()
++ void onDestroy()
+}
+
+
+interface com.example.kursa.LearnFragment$OnWordsLoadedListener {
+~ void onWordsLoaded(boolean)
+}
+
+class com.example.kursa.LevelListFragment {
+- LinearLayout levelContainer
+- Button addLevelButton
+- FirebaseFirestore db
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadLevels()
++ void onResume()
+}
+
+
+class com.example.kursa.DialogueListFragment {
+- LinearLayout dialogueContainer
+- Button addDialogueButton
+- FirebaseFirestore db
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadDialogues()
++ void onResume()
+}
+
+
+class com.example.kursa.WordLevel {
+- String english
+- String translation
+- boolean isHard
++ String getEnglish()
++ String getTranslation()
++ boolean isHard()
++ void setHard(boolean)
+}
+
+
+class com.example.kursa.Parser {
++ List<Word> parseSkyengWords()
+}
+
+class com.example.kursa.SlovarActivity {
+- RecyclerView recyclerView
+- WordAdapter adapter
+- List<WordLevel> wordList
+- List<WordLevel> allWordsList
+- List<WordLevel> hardWordsList
+- String userNickname
+- Button btnAllWords
+- ImageButton backBtm
+- FirebaseFirestore db
+- boolean showingHardWords
+# void onCreate(Bundle)
+- void initializeViews()
+- void setupRecyclerView()
+- void setupButtons()
+- void loadWordsFromFirebase()
+- void processWords(DocumentSnapshot)
+- WordLevel createWordFromEntry(String,Object)
+- void showAllWords()
+- void showHardWords()
+- void updateWordList(List<WordLevel>)
+- void updateButtonColors(boolean)
+- void deleteHardWord(WordLevel)
+}
+
+
+class com.example.kursa.NavigationActivity {
+- BottomNavigationView bottomNavigationView
+- String nickname
+# void onCreate(Bundle)
++ void setFragment(Fragment)
+}
+
+
+class com.example.kursa.WorkManagerHelper {
++ {static} void scheduleDailyTask(Context)
+}
+
+class com.example.kursa.SendMailTask {
+- String senderEmail
+- String senderPassword
+- String recipientEmail
+- String subject
+- String body
+# Boolean doInBackground(Void)
+# void onPostExecute(Boolean)
+}
+
+
+
+
+androidx.fragment.app.Fragment <|-- com.example.kursa.UpdateDailyFragment
+com.example.kursa.Adapter <|-- com.example.kursa.WordAdapter2
+com.example.kursa.WordAdapter2 +.. com.example.kursa.WordAdapter2$ViewHolder
+com.example.kursa.ViewHolder <|-- com.example.kursa.WordAdapter2$ViewHolder
+androidx.fragment.app.Fragment <|-- com.example.kursa.LevelsFragment
+com.example.kursa.Adapter <|-- com.example.kursa.LevelsAdapter
+com.example.kursa.LevelsAdapter +.. com.example.kursa.LevelsAdapter$LevelViewHolder
+com.example.kursa.ViewHolder <|-- com.example.kursa.LevelsAdapter$LevelViewHolder
+com.example.kursa.LevelsAdapter +.. com.example.kursa.LevelsAdapter$OnLevelClickListener
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.DialogueEditActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.NavigationAdminActivity
+com.example.kursa.Adapter <|-- com.example.kursa.ChatAdapter
+com.example.kursa.ChatAdapter +.. com.example.kursa.ChatAdapter$ChatViewHolder
+com.example.kursa.ViewHolder <|-- com.example.kursa.ChatAdapter$ChatViewHolder
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.MainActivity
+com.example.kursa.Adapter <|-- com.example.kursa.ReytingAdapter
+com.example.kursa.ReytingAdapter +.. com.example.kursa.ReytingAdapter$UserViewHolder
+com.example.kursa.ViewHolder <|-- com.example.kursa.ReytingAdapter$UserViewHolder
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.DialogueActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.LevelAddActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.DialogueAddActivity
+com.example.kursa.Adapter <|-- com.example.kursa.WordAdapterBuild
+com.example.kursa.WordAdapterBuild +.. com.example.kursa.WordAdapterBuild$WordViewHolder
+com.example.kursa.ViewHolder <|-- com.example.kursa.WordAdapterBuild$WordViewHolder
+com.example.kursa.WordAdapterBuild +.. com.example.kursa.WordAdapterBuild$OnWordClickListener
+androidx.fragment.app.Fragment <|-- com.example.kursa.LevelMainListFragment
+java.io.Serializable <|.. com.example.kursa.Word
+java.io.Serializable <|.. com.example.kursa.Level
+androidx.fragment.app.Fragment <|-- com.example.kursa.ReytingFragment
+com.example.kursa.Adapter <|-- com.example.kursa.WordAdapter
+com.example.kursa.WordAdapter +.. com.example.kursa.WordAdapter$OnDeleteClickListener
+com.example.kursa.WordAdapter +.. com.example.kursa.WordAdapter$ViewHolder
+com.example.kursa.ViewHolder <|-- com.example.kursa.WordAdapter$ViewHolder
+androidx.fragment.app.Fragment <|-- com.example.kursa.ProfileFragment
+androidx.fragment.app.Fragment <|-- com.example.kursa.AddLevelFragment
+com.example.kursa.AddLevelFragment +.. com.example.kursa.AddLevelFragment$OnLevelIdGeneratedListener
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.LevelEditActivity
+androidx.fragment.app.Fragment <|-- com.example.kursa.DialogueSelectionFragment
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.TestActivity
+com.example.kursa.FirestoreHelper +.. com.example.kursa.FirestoreHelper$UpdateListener
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.RegisterActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.ChangePasswordActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.LevelActivActivity
+com.example.kursa.LevelActivActivity +.. com.example.kursa.LevelActivActivity$GestureListener
+com.example.kursa.SimpleOnGestureListener <|-- com.example.kursa.LevelActivActivity$GestureListener
+androidx.fragment.app.Fragment <|-- com.example.kursa.ProfileAdminFragment
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.LevelMainAddActivity
+com.example.kursa.LevelMainAddActivity +.. com.example.kursa.LevelMainAddActivity$OnLevelIdGeneratedListener
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.SentenceBuilderActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.LevelMainEditActivity
+androidx.work.Worker <|-- com.example.kursa.DailyWordWorker
+androidx.fragment.app.Fragment <|-- com.example.kursa.LearnFragment
+com.example.kursa.LearnFragment +.. com.example.kursa.LearnFragment$OnWordsLoadedListener
+androidx.fragment.app.Fragment <|-- com.example.kursa.LevelListFragment
+androidx.fragment.app.Fragment <|-- com.example.kursa.DialogueListFragment
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.SlovarActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.kursa.NavigationActivity
+android.os.AsyncTask <|-- com.example.kursa.SendMailTask
+@enduml

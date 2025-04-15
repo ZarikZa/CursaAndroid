@@ -21,7 +21,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * LearnFragment — фрагмент для обучения, предоставляющий доступ к тестам на слова и уровням предложений.
+ * Отображает таймер до следующего ежедневного обновления, кнопки для тестов (последние 10 слов, все слова, ежедневный тест)
+ * и динамически загружаемые уровни предложений из Firestore.
+ */
 public class LearnFragment extends Fragment {
 
     private TextView tvTimeRemaining;
@@ -33,6 +37,11 @@ public class LearnFragment extends Fragment {
     private Button EzednevIspitBtm;
     private LinearLayout levelsContainer;
 
+    /**
+     * Инициализирует фрагмент, извлекает никнейм пользователя из аргументов.
+     *
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +50,14 @@ public class LearnFragment extends Fragment {
         }
     }
 
+    /**
+     * Создает представление фрагмента, настраивает таймер, кнопки тестов и загружает уровни.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frame_learn, container, false);
@@ -109,12 +126,14 @@ public class LearnFragment extends Fragment {
             });
         });
 
-        // Загрузка уровней
         loadLevels();
 
         return view;
     }
 
+    /**
+     * Загружает уровни предложений из Firestore и создает кнопки для каждого уровня.
+     */
     private void loadLevels() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("sentenceLevels")
@@ -123,7 +142,6 @@ public class LearnFragment extends Fragment {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String levelId = document.getId();
 
-                        // Создаём кнопку для уровня
                         Button levelButton = new Button(getContext());
                         levelButton.setText("Уровень: " + levelId);
                         levelButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#292828")));
@@ -136,7 +154,6 @@ public class LearnFragment extends Fragment {
                         params.setMargins(0, 0, 0, 8);
                         levelButton.setLayoutParams(params);
 
-                        // Обработчик нажатия на кнопку уровня
                         levelButton.setOnClickListener(v -> {
                             Intent intent = new Intent(getContext(), SentenceBuilderActivity.class);
                             intent.putExtra("levelId", levelId);
@@ -144,7 +161,6 @@ public class LearnFragment extends Fragment {
                             startActivity(intent);
                         });
 
-                        // Добавляем разделитель перед кнопкой (кроме первой)
                         if (levelsContainer.getChildCount() > 1) {
                             View divider = new View(getContext());
                             divider.setLayoutParams(new LinearLayout.LayoutParams(
@@ -162,6 +178,12 @@ public class LearnFragment extends Fragment {
                 });
     }
 
+    /**
+     * Возвращает последние 10 слов из списка.
+     *
+     * @param wordList Список слов
+     * @return Список последних 10 слов или исходный список, если слов меньше 10
+     */
     private List<Word> getLastTenWords(List<Word> wordList) {
         if (wordList == null || wordList.size() < 10) {
             Toast.makeText(requireActivity(), "Недостаточно слов для теста (нужно минимум 10)", Toast.LENGTH_SHORT).show();
@@ -171,6 +193,11 @@ public class LearnFragment extends Fragment {
         return new ArrayList<>(wordList.subList(startIndex, wordList.size()));
     }
 
+    /**
+     * Загружает изученные слова пользователя из Firestore.
+     *
+     * @param listener Слушатель результата загрузки
+     */
     private void loadWordsFromFirebase(OnWordsLoadedListener listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("usersLearnedWords").document(userNickname)
@@ -193,7 +220,6 @@ public class LearnFragment extends Fragment {
                             }
                             listener.onWordsLoaded(true);
                         } else {
-                            Toast.makeText(requireActivity(), "Словарь пуст", Toast.LENGTH_SHORT).show();
                             listener.onWordsLoaded(false);
                         }
                     } else {
@@ -207,6 +233,11 @@ public class LearnFragment extends Fragment {
                 });
     }
 
+    /**
+     * Загружает ежедневные слова из Firestore.
+     *
+     * @param listener Слушатель результата загрузки
+     */
     private void loadDailyWordsFromFirebase(OnWordsLoadedListener listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("dailyWords")
@@ -224,7 +255,6 @@ public class LearnFragment extends Fragment {
                             }
                             listener.onWordsLoaded(true);
                         } else {
-                            Toast.makeText(requireActivity(), "Словарь пуст", Toast.LENGTH_SHORT).show();
                             listener.onWordsLoaded(false);
                         }
                     } else {
@@ -238,6 +268,9 @@ public class LearnFragment extends Fragment {
                 });
     }
 
+    /**
+     * Запускает таймер обратного отсчета до следующего ежедневного обновления.
+     */
     private void startDailyChallengeTimer() {
         Calendar now = Calendar.getInstance();
         Calendar nextUpdateTime = Calendar.getInstance();
@@ -267,6 +300,9 @@ public class LearnFragment extends Fragment {
         countDownTimer.start();
     }
 
+    /**
+     * Отменяет таймер при уничтожении фрагмента.
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -275,6 +311,9 @@ public class LearnFragment extends Fragment {
         }
     }
 
+    /**
+     * Интерфейс для обработки результата загрузки слов.
+     */
     public interface OnWordsLoadedListener {
         void onWordsLoaded(boolean isSuccess);
     }

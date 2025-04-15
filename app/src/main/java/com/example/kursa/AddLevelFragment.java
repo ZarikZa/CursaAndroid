@@ -1,3 +1,4 @@
+
 package com.example.kursa;
 
 import android.os.Bundle;
@@ -16,7 +17,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * AddLevelFragment — фрагмент для создания и добавления новых уровней словаря в Firestore.
+ * Предоставляет интерфейс для ввода названия уровня, 10 английских слов и их переводов на русский.
+ * Выполняет валидацию данных, генерирует уникальный ID уровня, сохраняет уровень в коллекцию "levelsAll"
+ * и привязывает его ко всем пользователям в коллекции "levels". Обеспечивает проверку символов,
+ * обработку ошибок и обратную связь через Toast-сообщения.
+ */
 public class AddLevelFragment extends Fragment {
 
     private TextInputEditText levelNameEditText;
@@ -25,6 +32,15 @@ public class AddLevelFragment extends Fragment {
     private Button addLevelButton;
     private FirebaseFirestore db;
 
+    /**
+     * Инициализирует UI фрагмента, связывает элементы интерфейса с полями класса и настраивает
+     * обработчик нажатия кнопки для добавления уровня.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер для фрагмента
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_level_main_add, container, false);
@@ -62,10 +78,14 @@ public class AddLevelFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Собирает данные из полей ввода, выполняет валидацию (пустые поля, корректность символов),
+     * формирует уровень и сохраняет его в Firestore. После успешного сохранения вызывает
+     * привязку уровня к пользователям.
+     */
     private void addLevelToFirestore() {
         String userLevelName = levelNameEditText.getText().toString().trim();
 
-        // Проверка на пустое название уровня
         if (userLevelName.isEmpty()) {
             levelNameEditText.setError("Введите название уровня");
             return;
@@ -74,13 +94,11 @@ public class AddLevelFragment extends Fragment {
         String[] englishWordStrings = new String[10];
         String[] translationStrings = new String[10];
 
-        // Сбор данных из полей
         for (int i = 0; i < 10; i++) {
             englishWordStrings[i] = englishWords[i].getText().toString().trim();
             translationStrings[i] = translations[i].getText().toString().trim();
         }
 
-        // Проверка на пустые поля
         for (int i = 0; i < 10; i++) {
             if (englishWordStrings[i].isEmpty() || translationStrings[i].isEmpty()) {
                 Toast.makeText(getContext(), "Заполните все поля слов и переводов", Toast.LENGTH_SHORT).show();
@@ -88,23 +106,20 @@ public class AddLevelFragment extends Fragment {
             }
         }
 
-        // Проверка английских слов (только английские символы)
         for (int i = 0; i < 10; i++) {
             if (!englishWordStrings[i].matches("^[a-zA-Z\\s.,!?'-]+$")) {
-                Toast.makeText(getContext(), "Word " + (i + 1) + " (English) must contain only English characters", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Слово " + (i + 1) + " (английское) должно содержать только английские символы", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка переводов (только русские символы)
         for (int i = 0; i < 10; i++) {
             if (!translationStrings[i].matches("^[а-яА-ЯёЁ\\s.,!?'-]+$")) {
-                Toast.makeText(getContext(), "Translation " + (i + 1) + " (Russian) must contain only Russian characters", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Перевод " + (i + 1) + " (русский) должен содержать только русские символы", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Формирование данных
         Map<String, String> wordsMap = new HashMap<>();
         for (int i = 0; i < 10; i++) {
             wordsMap.put(englishWordStrings[i], translationStrings[i]);
@@ -139,6 +154,9 @@ public class AddLevelFragment extends Fragment {
         });
     }
 
+    /**
+     * Очищает все поля ввода (название уровня, слова и переводы) после успешного добавления уровня.
+     */
     private void resetFields() {
         levelNameEditText.setText("");
         for (int i = 0; i < 10; i++) {
@@ -147,6 +165,12 @@ public class AddLevelFragment extends Fragment {
         }
     }
 
+    /**
+     * Генерирует уникальный ID уровня на основе количества существующих уровней в коллекции "levelsAll".
+     * Передает сгенерированный ID через callback.
+     *
+     * @param listener Callback для передачи сгенерированного ID
+     */
     private void generateLevelId(OnLevelIdGeneratedListener listener) {
         db.collection("levelsAll")
                 .get()
@@ -161,6 +185,12 @@ public class AddLevelFragment extends Fragment {
                 });
     }
 
+    /**
+     * Привязывает новый уровень ко всем пользователям в коллекции "levels".
+     * Если документ пользователя отсутствует, создает новый. Логирует успех или ошибки.
+     *
+     * @param level Данные уровня для привязки
+     */
     private void bindLevelToUsers(Map<String, Object> level) {
         db.collection("users")
                 .get()
@@ -197,16 +227,16 @@ public class AddLevelFragment extends Fragment {
                             Log.e("Firestore", "Никнейм пользователя пустой или null");
                         }
                     }
-
-                    Toast.makeText(getContext(), "Уровень привязан ко всем пользователям", Toast.LENGTH_SHORT).show();
                     getParentFragmentManager().popBackStack();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Ошибка при привязке уровня", Toast.LENGTH_SHORT).show();
                     Log.e("Firestore", "Ошибка при получении пользователей", e);
                 });
     }
 
+    /**
+     * Интерфейс для передачи сгенерированного ID уровня через callback.
+     */
     interface OnLevelIdGeneratedListener {
         void onLevelIdGenerated(String levelId);
     }

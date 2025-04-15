@@ -7,31 +7,28 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.animation.AnimatorListenerAdapter;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
+/**
+ * TestActivity — активность для тестирования знаний слов уровня.
+ * Показывает английские слова, принимает перевод от пользователя, проверяет правильность
+ * и обновляет рейтинг на основе результатов. Использует анимацию для визуальной обратной связи.
+ */
 public class TestActivity extends AppCompatActivity {
 
     private TextView contentTextView;
     private TextView levelNameTextView;
     private List<Word> unlearnedWords;
-    private List<Word> learnedWords;
     private int currentIndex = 0;
     private EditText inputTranslationEditText;
     private Button checkTranslationButton;
@@ -43,6 +40,11 @@ public class TestActivity extends AppCompatActivity {
     private int correctAnswers = 0;
     private int totalWords = 0;
 
+    /**
+     * Инициализирует активность, настраивает интерфейс, локализацию и обработчики событий.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,12 +84,14 @@ public class TestActivity extends AppCompatActivity {
         completeButton.setOnClickListener(v -> finish());
     }
 
+    /**
+     * Обновляет содержимое экрана: показывает следующее слово или результаты.
+     */
     private void updateContent() {
         if (unlearnedWords.isEmpty()) {
             contentTextView.setText("Вы изучили все слова!\n");
             String progressText = String.format(Locale.getDefault(), "Выучено %d из %d слов", correctAnswers, totalWords);
             contentTextView.append("\n\n" + progressText);
-            Toast.makeText(this, "Обучение завершено", Toast.LENGTH_SHORT).show();
             completeButton.setVisibility(View.VISIBLE);
             inputTranslationEditText.setVisibility(View.GONE);
             checkTranslationButton.setVisibility(View.GONE);
@@ -105,6 +109,10 @@ public class TestActivity extends AppCompatActivity {
         inputTranslationEditText.setText("");
     }
 
+    /**
+     * Проверяет введенный перевод, обновляет счетчик правильных ответов
+     * и переходит к следующему слову.
+     */
     private void checkTranslation() {
         String userInput = inputTranslationEditText.getText().toString().trim();
 
@@ -119,14 +127,11 @@ public class TestActivity extends AppCompatActivity {
         if (userInput.equalsIgnoreCase(correctTranslation)) {
             animateBackgroundColor(inputTranslationEditText, Color.GREEN);
             correctAnswers++;
-            Toast.makeText(this, "Правильно!", Toast.LENGTH_SHORT).show();
         } else {
             animateBackgroundColor(inputTranslationEditText, Color.RED);
-            Toast.makeText(this, "Неправильно! Правильный перевод: " + correctTranslation, Toast.LENGTH_SHORT).show();
         }
 
         new android.os.Handler().postDelayed(() -> {
-            // Переход к следующему слову
             currentIndex++;
             if (currentIndex < unlearnedWords.size()) {
                 updateContent();
@@ -134,50 +139,52 @@ public class TestActivity extends AppCompatActivity {
                 unlearnedWords.clear();
                 updateContent();
             }
-        }, 1000); // Задержка 1 секунда (1000 мс)
+        }, 1000);
     }
 
-
+    /**
+     * Анимирует изменение цвета фона элемента ввода для обратной связи.
+     *
+     * @param view        Элемент для анимации
+     * @param targetColor Целевой цвет (зеленый или красный)
+     */
     private void animateBackgroundColor(View view, int targetColor) {
-        // Исходный цвет (серый или другой, который вы используете)
-        int startColor = Color.parseColor("#888888"); // Серый цвет
-
-        // Создаем GradientDrawable для скруглённых углов
+        int startColor = Color.parseColor("#888888");
         GradientDrawable drawable = new GradientDrawable();
-        drawable.setShape(GradientDrawable.RECTANGLE); // Прямоугольник
-        drawable.setCornerRadius(16f); // Скруглённые углы с радиусом 16dp
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        drawable.setCornerRadius(16f);
 
-        // Анимация изменения цвета на целевой (красный или зелёный)
         ValueAnimator colorAnimator = ValueAnimator.ofArgb(startColor, targetColor);
-        colorAnimator.setDuration(700); // 0.7 секунды до целевого цвета
-        colorAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        colorAnimator.setDuration(700);
+        colorAnimator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
         colorAnimator.addUpdateListener(animator -> {
             int animatedColor = (int) animator.getAnimatedValue();
-            drawable.setColor(animatedColor); // Устанавливаем анимированный цвет
-            view.setBackground(drawable); // Применяем новый фон
+            drawable.setColor(animatedColor);
+            view.setBackground(drawable);
         });
 
-        // Анимация возврата к исходному цвету
         ValueAnimator reverseColorAnimator = ValueAnimator.ofArgb(targetColor, startColor);
-        reverseColorAnimator.setDuration(700); // 0.7 секунды до возврата
-        reverseColorAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        reverseColorAnimator.setDuration(700);
+        reverseColorAnimator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
         reverseColorAnimator.addUpdateListener(animator -> {
             int animatedColor = (int) animator.getAnimatedValue();
-            drawable.setColor(animatedColor); // Устанавливаем анимированный цвет
-            view.setBackground(drawable); // Применяем новый фон
+            drawable.setColor(animatedColor);
+            view.setBackground(drawable);
         });
 
-        // Запуск анимаций последовательно
-        colorAnimator.addListener(new AnimatorListenerAdapter() {
+        colorAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(android.animation.Animator animation) {
-                reverseColorAnimator.start(); // Запускаем обратную анимацию после завершения первой
+                reverseColorAnimator.start();
             }
         });
 
-        colorAnimator.start(); // Запускаем первую анимацию
+        colorAnimator.start();
     }
 
+    /**
+     * Показывает результат тестирования и обновляет рейтинговые баллы.
+     */
     private void showResult() {
         double percentage = (double) correctAnswers / totalWords * 100;
         String message;
@@ -193,9 +200,12 @@ public class TestActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Обновляет рейтинговые баллы пользователя в Firestore.
+     *
+     * @param change Значение изменения рейтинга (+1 или -1)
+     */
     private void updateRatingPoints(int change) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         if (nickname == null) {
             Toast.makeText(this, "Ошибка: никнейм пользователя не найден", Toast.LENGTH_SHORT).show();
             return;
@@ -211,9 +221,7 @@ public class TestActivity extends AppCompatActivity {
 
                         db.collection("users").document(userId)
                                 .update("reytingPoints", FieldValue.increment(change))
-                                .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(this, "Рейтинг обновлён", Toast.LENGTH_SHORT).show();
-                                })
+                                .addOnSuccessListener(aVoid -> {})
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(this, "Ошибка обновления рейтинга: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 });
@@ -225,14 +233,20 @@ public class TestActivity extends AppCompatActivity {
                     Toast.makeText(this, "Ошибка поиска пользователя: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+    /**
+     * Применяет стиль к полю ввода (скругленные углы, серый фон, белый текст).
+     *
+     * @param editText Поле ввода
+     */
     private void setEditTextStyle(EditText editText) {
         GradientDrawable drawable = new GradientDrawable();
-        drawable.setShape(GradientDrawable.RECTANGLE); // Прямоугольник
-        drawable.setColor(Color.parseColor("#888888")); // Серый цвет
-        drawable.setCornerRadius(16f); // Скругленные углы с радиусом 16dp
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        drawable.setColor(Color.parseColor("#888888"));
+        drawable.setCornerRadius(16f);
 
-        editText.setBackground(drawable); // Применение фона к EditText
-        editText.setTextColor(Color.WHITE); // Белый цвет текста
-        editText.setHintTextColor(Color.parseColor("#B0B0B0")); // Цвет подсказки
+        editText.setBackground(drawable);
+        editText.setTextColor(Color.WHITE);
+        editText.setHintTextColor(Color.parseColor("#B0B0B0"));
     }
 }

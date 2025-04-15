@@ -7,19 +7,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * UpdateDailyFragment — фрагмент для отображения и обновления ежедневных слов.
+ * Загружает текущие слова из Firestore, отображает их в RecyclerView и позволяет
+ * обновлять список слов через парсер и селектор слов.
+ */
 public class UpdateDailyFragment extends Fragment {
     private static final String TAG = "UpdateDailyFragment";
     private FirebaseFirestore db;
@@ -30,6 +31,11 @@ public class UpdateDailyFragment extends Fragment {
     private WordAdapter2 wordAdapter;
     private List<Word> wordList;
 
+    /**
+     * Инициализирует объекты Firestore, парсера, селектора и списка слов.
+     *
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +46,14 @@ public class UpdateDailyFragment extends Fragment {
         wordList = new ArrayList<>();
     }
 
+    /**
+     * Создает представление фрагмента, настраивает RecyclerView и кнопку обновления.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -58,21 +72,20 @@ public class UpdateDailyFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Запускает процесс обновления слов и перезагружает список.
+     */
     private void updateWordsAndRefresh() {
         firestoreHelper.setUpdateListener(success -> {
             requireActivity().runOnUiThread(() -> {
-                if (success) {
-                    loadDailyWordsFromFirebase();
-                    Toast.makeText(getContext(), "Слова успешно обновлены", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Данные обновлены и список перезагружен");
-                } else {
-                    Toast.makeText(getContext(), "Ошибка при обновлении слов", Toast.LENGTH_SHORT).show();
-                }
             });
         });
         firestoreHelper.checkAndUpdateData(parser, wordSelector);
     }
 
+    /**
+     * Загружает текущие ежедневные слова из Firestore и обновляет RecyclerView.
+     */
     private void loadDailyWordsFromFirebase() {
         db.collection("dailyWords")
                 .document("current")
@@ -98,7 +111,6 @@ public class UpdateDailyFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Ошибка загрузки слов: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Ошибка загрузки слов", e);
                 });
     }
 }

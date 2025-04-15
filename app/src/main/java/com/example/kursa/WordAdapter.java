@@ -8,20 +8,40 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
-
+/**
+ * WordAdapter — адаптер для отображения списка слов в словаре.
+ * Используется в RecyclerView для показа английских слов, их переводов и кнопки удаления
+ * для сложных слов. Поддерживает обработку нажатий на кнопку удаления через слушатель.
+ */
 public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
     private List<WordLevel> wordList;
     private OnDeleteClickListener deleteClickListener;
 
+    /**
+     * Интерфейс для обработки нажатий на кнопку удаления.
+     */
     public interface OnDeleteClickListener {
         void onDeleteClick(WordLevel word);
     }
 
+    /**
+     * Конструктор адаптера.
+     *
+     * @param wordList            Список слов для отображения
+     * @param deleteClickListener Слушатель для обработки удаления слов
+     */
     public WordAdapter(List<WordLevel> wordList, OnDeleteClickListener listener) {
         this.wordList = wordList;
         this.deleteClickListener = listener;
     }
 
+    /**
+     * Создает новый ViewHolder для элемента списка.
+     *
+     * @param parent   Родительская ViewGroup
+     * @param viewType Тип представления
+     * @return Новый экземпляр ViewHolder
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -30,23 +50,43 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
         return new ViewHolder(view, deleteClickListener);
     }
 
+    /**
+     * Связывает данные слова с ViewHolder.
+     *
+     * @param holder   ViewHolder для элемента
+     * @param position Позиция элемента в списке
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         WordLevel word = wordList.get(position);
         holder.bind(word);
     }
 
+    /**
+     * Возвращает количество слов в списке.
+     *
+     * @return Размер списка слов
+     */
     @Override
     public int getItemCount() {
         return wordList.size();
     }
 
+    /**
+     * ViewHolder для элемента списка, содержащий поля для слова, перевода и кнопки удаления.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView englishWordTextView;
         private final TextView translationTextView;
         private final ImageButton deleteButton;
 
-        public ViewHolder(View itemView, OnDeleteClickListener listener) {
+        /**
+         * Конструктор ViewHolder.
+         *
+         * @param itemView            Представление элемента
+         * @param deleteClickListener Слушатель для обработки удаления
+         */
+        public ViewHolder(View itemView, OnDeleteClickListener deleteClickListener) {
             super(itemView);
             englishWordTextView = itemView.findViewById(R.id.englishWordTextView);
             translationTextView = itemView.findViewById(R.id.translationTextView);
@@ -55,11 +95,16 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.ViewHolder> {
             deleteButton.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    listener.onDeleteClick((WordLevel) itemView.getTag());
+                    deleteClickListener.onDeleteClick((WordLevel) itemView.getTag());
                 }
             });
         }
 
+        /**
+         * Связывает данные слова с элементами интерфейса.
+         *
+         * @param word Объект слова
+         */
         public void bind(WordLevel word) {
             itemView.setTag(word);
             englishWordTextView.setText(word.getEnglish());

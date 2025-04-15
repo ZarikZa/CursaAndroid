@@ -13,25 +13,48 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * FirestoreHelper — утилитный класс для работы с Firestore.
+ * Проверяет и обновляет ежедневные слова в коллекции "dailyWords",
+ * используя парсер и селектор слов. Поддерживает асинхронное обновление
+ * и уведомление о результате через UpdateListener.
+ */
 public class FirestoreHelper {
     private static final String TAG = "FirestoreHelper";
     private final FirebaseFirestore db;
     private UpdateListener updateListener;
 
+    /**
+     * Интерфейс для уведомления о завершении обновления данных.
+     */
     public interface UpdateListener {
         void onUpdateComplete(boolean success);
     }
 
+    /**
+     * Инициализирует FirestoreHelper и подключается к Firestore.
+     */
     public FirestoreHelper() {
         db = FirebaseFirestore.getInstance();
         Log.d(TAG, "FirestoreHelper initialized");
     }
 
+    /**
+     * Устанавливает слушатель для получения уведомлений об обновлении.
+     *
+     * @param listener Слушатель обновления
+     */
     public void setUpdateListener(UpdateListener listener) {
         this.updateListener = listener;
     }
 
+    /**
+     * Проверяет необходимость обновления ежедневных слов и запускает процесс,
+     * если данные устарели или отсутствуют.
+     *
+     * @param parser      Парсер для получения слов
+     * @param wordSelector Селектор для выбора случайных слов
+     */
     public void checkAndUpdateData(Parser parser, WordSelector wordSelector) {
         String todayDate = DateHelper.getTodayDate();
         Log.d(TAG, "Checking data for date: " + todayDate);
@@ -66,6 +89,13 @@ public class FirestoreHelper {
                 });
     }
 
+    /**
+     * Выполняет парсинг слов и обновляет данные в Firestore в отдельном потоке.
+     *
+     * @param parser      Парсер для получения слов
+     * @param wordSelector Селектор для выбора слов
+     * @param todayDate   Текущая дата
+     */
     private void updateDailyWords(Parser parser, WordSelector wordSelector, String todayDate) {
         new Thread(() -> {
             try {
@@ -81,6 +111,12 @@ public class FirestoreHelper {
         }).start();
     }
 
+    /**
+     * Сохраняет список слов и дату в Firestore.
+     *
+     * @param words     Список слов для сохранения
+     * @param todayDate Текущая дата
+     */
     private void saveDailyWords(List<Word> words, String todayDate) {
         Map<String, Object> data = new HashMap<>();
         data.put("date", todayDate);

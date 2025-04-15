@@ -10,13 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+/**
+ * ProfileAdminFragment — фрагмент для отображения профиля администратора.
+ * Показывает логин и никнейм, позволяет сменить пароль или выйти из аккаунта.
+ * Использует Firestore для получения данных пользователя и SharedPreferences для управления сессией.
+ */
 public class ProfileAdminFragment extends Fragment {
 
     private TextView loginTextView, nicknameTextView;
@@ -24,9 +26,17 @@ public class ProfileAdminFragment extends Fragment {
     private Button logoutButton, changePasswordButton;
     private String login;
 
+    /**
+     * Создает представление фрагмента, инициализирует элементы интерфейса
+     * и настраивает обработчики событий.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frame_profile_admin, container, false);
 
         loginTextView = view.findViewById(R.id.loginTextView);
@@ -43,9 +53,7 @@ public class ProfileAdminFragment extends Fragment {
             fetchUserData(nickname);
         }
 
-        logoutButton.setOnClickListener(v ->{
-            showLogoutConfirmationDialog();
-        });
+        logoutButton.setOnClickListener(v -> showLogoutConfirmationDialog());
 
         changePasswordButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
@@ -56,6 +64,9 @@ public class ProfileAdminFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Показывает диалог подтверждения выхода из аккаунта.
+     */
     private void showLogoutConfirmationDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Подтверждение выхода")
@@ -65,6 +76,10 @@ public class ProfileAdminFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Выполняет выход из аккаунта, очищает SharedPreferences и перенаправляет
+     * на экран авторизации.
+     */
     private void performLogout() {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -77,6 +92,11 @@ public class ProfileAdminFragment extends Fragment {
         requireActivity().finish();
     }
 
+    /**
+     * Загружает данные пользователя из Firestore по никнейму.
+     *
+     * @param nickname Никнейм пользователя
+     */
     private void fetchUserData(String nickname) {
         db.collection("users")
                 .whereEqualTo("nickname", nickname)

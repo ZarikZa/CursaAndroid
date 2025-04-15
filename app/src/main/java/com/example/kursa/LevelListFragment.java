@@ -11,13 +11,26 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
+/**
+ * LevelListFragment — фрагмент для отображения списка уровней предложений.
+ * Загружает уровни из Firestore, отображает их в виде кнопок, позволяет перейти
+ * к редактированию существующего уровня или созданию нового.
+ */
 public class LevelListFragment extends Fragment {
 
     private LinearLayout levelContainer;
     private Button addLevelButton;
     private FirebaseFirestore db;
 
+    /**
+     * Инициализирует фрагмент, устанавливает layout, связывает элементы интерфейса
+     * и настраивает обработчик для кнопки добавления уровня. Загружает список уровней.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_level_list, container, false);
@@ -36,12 +49,16 @@ public class LevelListFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Загружает список уровней из Firestore и отображает их в виде кнопок.
+     * Каждая кнопка ведет к редактированию соответствующего уровня.
+     */
     private void loadLevels() {
         db.collection("sentenceLevels")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!isAdded()) return; // Проверяем, что фрагмент прикреплён
-                    levelContainer.removeAllViews(); // Очищаем контейнер перед загрузкой
+                    if (!isAdded()) return;
+                    levelContainer.removeAllViews();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String levelId = document.getId();
 
@@ -76,9 +93,12 @@ public class LevelListFragment extends Fragment {
                 });
     }
 
+    /**
+     * Обновляет список уровней при возвращении фрагмента в активное состояние.
+     */
     @Override
     public void onResume() {
         super.onResume();
-        loadLevels(); // Обновляем список уровней при возвращении
+        loadLevels();
     }
 }

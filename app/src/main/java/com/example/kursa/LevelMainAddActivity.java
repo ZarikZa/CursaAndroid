@@ -19,7 +19,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * LevelMainAddActivity — активность для создания нового уровня слов и их переводов.
+ * Позволяет ввести название уровня, 10 английских слов с переводами, проверяет корректность
+ * данных и сохраняет уровень в Firestore в коллекции "levelsAll", а также распределяет
+ * его всем пользователям в коллекции "levels".
+ */
 public class LevelMainAddActivity extends AppCompatActivity {
 
     private EditText levelNameEditText;
@@ -28,6 +33,12 @@ public class LevelMainAddActivity extends AppCompatActivity {
     private Button addLevelButton;
     private FirebaseFirestore db;
 
+    /**
+     * Инициализирует активность, устанавливает layout, связывает элементы интерфейса
+     * и настраивает обработчик для кнопки добавления уровня.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +50,9 @@ public class LevelMainAddActivity extends AppCompatActivity {
         addLevelButton.setOnClickListener(v -> addLevelToFirestore());
     }
 
+    /**
+     * Инициализирует элементы интерфейса (поля ввода и кнопку).
+     */
     private void initializeViews() {
         levelNameEditText = findViewById(R.id.levelNameEditText);
 
@@ -67,6 +81,9 @@ public class LevelMainAddActivity extends AppCompatActivity {
         addLevelButton = findViewById(R.id.addLevelButton);
     }
 
+    /**
+     * Собирает данные уровня, проверяет их корректность и запускает процесс создания уровня.
+     */
     private void addLevelToFirestore() {
         String levelName = levelNameEditText.getText().toString().trim();
         if (levelName.isEmpty()) {
@@ -82,25 +99,27 @@ public class LevelMainAddActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Собирает данные слов и переводов из полей ввода, проверяет их корректность.
+     *
+     * @return Карта слов с переводами или null при ошибке
+     */
     private Map<String, String> collectWordsData() {
         Map<String, String> wordsMap = new HashMap<>();
         for (int i = 0; i < 10; i++) {
             String englishWord = englishWords[i].getText().toString().trim();
             String translation = translations[i].getText().toString().trim();
 
-            // Проверка на пустые поля
             if (englishWord.isEmpty() || translation.isEmpty()) {
                 Toast.makeText(this, "Заполните все поля слов и переводов", Toast.LENGTH_SHORT).show();
                 return null;
             }
 
-            // Проверка английского слова
             if (!englishWord.matches("^[a-zA-Z\\s.,!?'-]+$")) {
                 Toast.makeText(this, "Слово " + (i + 1) + " должно быть на английском", Toast.LENGTH_SHORT).show();
                 return null;
             }
 
-            // Проверка русского перевода
             if (!translation.matches("^[а-яА-ЯёЁ\\s.,!?'-]+$")) {
                 Toast.makeText(this, "Перевод " + (i + 1) + " должен быть на русском", Toast.LENGTH_SHORT).show();
                 return null;
@@ -111,6 +130,13 @@ public class LevelMainAddActivity extends AppCompatActivity {
         return wordsMap;
     }
 
+    /**
+     * Создает и сохраняет уровень в Firestore.
+     *
+     * @param levelId   Уникальный ID уровня
+     * @param levelName Название уровня
+     * @param wordsMap  Карта слов с переводами
+     */
     private void createAndSaveLevel(String levelId, String levelName, Map<String, String> wordsMap) {
         int levelNumber = Integer.parseInt(levelId.replace("level", ""));
         String fullLevelName = "Уровень " + levelNumber + ": " + levelName;
@@ -137,6 +163,12 @@ public class LevelMainAddActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Распределяет созданный уровень всем пользователям.
+     *
+     * @param levelId   ID уровня
+     * @param levelData Данные уровня
+     */
     private void distributeLevelToUsers(String levelId, Map<String, Object> levelData) {
         db.collection("users").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -162,6 +194,13 @@ public class LevelMainAddActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Добавляет уровень в коллекцию конкретного пользователя.
+     *
+     * @param nickname  Никнейм пользователя
+     * @param levelData Данные уровня
+     * @return Задача Firestore
+     */
     private Task<Void> addLevelToUser(String nickname, Map<String, Object> levelData) {
         return db.collection("levels").document(nickname)
                 .update("levels", FieldValue.arrayUnion(levelData))
@@ -184,6 +223,11 @@ public class LevelMainAddActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Генерирует уникальный ID уровня на основе существующих уровней.
+     *
+     * @param listener Слушатель для возврата сгенерированного ID
+     */
     private void generateLevelId(OnLevelIdGeneratedListener listener) {
         db.collection("levelsAll").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -209,6 +253,9 @@ public class LevelMainAddActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Интерфейс для обработки сгенерированного ID уровня.
+     */
     interface OnLevelIdGeneratedListener {
         void onLevelIdGenerated(String levelId);
     }

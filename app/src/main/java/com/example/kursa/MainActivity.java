@@ -1,3 +1,4 @@
+
 package com.example.kursa;
 
 import android.content.Intent;
@@ -7,29 +8,37 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.Objects;
-
+/**
+ * MainActivity — активность для входа пользователя в приложение.
+ * Предоставляет интерфейс для авторизации, регистрации и восстановления пароля.
+ * Использует Firestore для проверки учетных данных и SharedPreferences для сохранения
+ * информации о входе. Перенаправляет на соответствующую активность в зависимости от роли.
+ */
 public class MainActivity extends AppCompatActivity {
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_PASSWORD = "password";
+    private static final String KEY_REMEMBER = "remember";
+    private static final String KEY_ROLE = "role";
+
     private Button enter;
     private Button regist;
     private TextView forgotPass;
     private EditText usernameEditText, passwordEditText;
     private FirebaseFirestore db;
     private SharedPreferences sharedPreferences;
-    private static final String PREFS_NAME = "LoginPrefs";
-    private static final String KEY_USERNAME = "username";
-    private static final String KEY_PASSWORD = "password";
-    private static final String KEY_REMEMBER = "remember";
-    private static final String KEY_ROLE = "role"; // Новый ключ для роли
 
+    /**
+     * Инициализирует активность, проверяет сохраненные данные для автологина,
+     * настраивает интерфейс и обработчики событий.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +83,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Обрабатывает попытку входа, проверяет данные в Firestore и перенаправляет
+     * пользователя в зависимости от роли.
+     */
     public void onLoginButtonClick() {
         String username = usernameEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
@@ -91,27 +104,24 @@ public class MainActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (!querySnapshot.isEmpty()) {
-                            // Успешный вход, получаем данные пользователя
                             DocumentSnapshot userDoc = querySnapshot.getDocuments().get(0);
                             String nickname = userDoc.getString("nickname");
                             String role = userDoc.getString("role");
 
-                            // Сохраняем данные в SharedPreferences
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putString(KEY_USERNAME, username);
                             editor.putString(KEY_PASSWORD, password);
                             editor.putBoolean(KEY_REMEMBER, true);
-                            editor.putString(KEY_ROLE, role); // Сохраняем роль как строку
+                            editor.putString(KEY_ROLE, role);
                             editor.apply();
 
-                            // Переход на нужную активность в зависимости от роли
                             Intent intent;
                             if ("user".equals(role)) {
                                 intent = new Intent(MainActivity.this, NavigationActivity.class);
                                 intent.putExtra("USER_NICKNAME", nickname);
                                 startActivity(intent);
                                 finish();
-                            } else { // Предполагаем, что другая роль — "admin"
+                            } else {
                                 intent = new Intent(MainActivity.this, NavigationAdminActivity.class);
                                 intent.putExtra("USER_NICKNAME", nickname);
                                 startActivity(intent);
@@ -126,11 +136,14 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Очищает сохраненные данные авторизации в SharedPreferences.
+     */
     private void clearSavedCredentials() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(KEY_USERNAME);
         editor.remove(KEY_PASSWORD);
-        editor.remove(KEY_ROLE); // Удаляем роль при очистке
+        editor.remove(KEY_ROLE);
         editor.putBoolean(KEY_REMEMBER, false);
         editor.apply();
     }

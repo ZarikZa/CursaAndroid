@@ -11,13 +11,26 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
+/**
+ * DialogueSelectionFragment — фрагмент для выбора диалога пользователем.
+ * Загружает список диалогов из Firestore и отображает их в виде кнопок.
+ * Каждая кнопка запускает DialogueActivity с соответствующим ID диалога и никнеймом пользователя.
+ */
 public class DialogueSelectionFragment extends Fragment {
 
     private LinearLayout dialogueContainer;
     private FirebaseFirestore db;
     private String nickname;
 
+    /**
+     * Инициализирует фрагмент, устанавливает layout, получает никнейм пользователя
+     * из аргументов и подготавливает контейнер для диалогов.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_dialogue_selection, container, false);
@@ -28,7 +41,7 @@ public class DialogueSelectionFragment extends Fragment {
             nickname = getArguments().getString("USER_NICKNAME");
         }
         if (nickname == null) {
-            Toast.makeText(requireContext(), "Error: Missing nickname", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Ошибка: Отсутствует никнейм", Toast.LENGTH_SHORT).show();
             requireActivity().getSupportFragmentManager().popBackStack();
             return view;
         }
@@ -36,15 +49,24 @@ public class DialogueSelectionFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Вызывается после создания представления, загружает список диалогов.
+     *
+     * @param view               Созданный View фрагмента
+     * @param savedInstanceState Сохраненное состояние
+     */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loadDialogues();
     }
 
+    /**
+     * Загружает диалоги из Firestore и создает кнопки для каждого диалога.
+     * Каждая кнопка отображает имя персонажа и запускает DialogueActivity.
+     */
     private void loadDialogues() {
         if (getContext() == null) {
-            Toast.makeText(requireActivity(), "Context is null, cannot load dialogues", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -58,8 +80,9 @@ public class DialogueSelectionFragment extends Fragment {
 
                         Button dialogueButton = new Button(getContext());
                         dialogueButton.setText(character + " Диалог");
-                        dialogueButton.setBackgroundResource(R.drawable.rounded_button_background); // Устанавливаем фон с закруглениями
-                        dialogueButton.setTextColor(android.graphics.Color.parseColor("#1c1c1c")); LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        dialogueButton.setBackgroundResource(R.drawable.rounded_button_background);
+                        dialogueButton.setTextColor(android.graphics.Color.parseColor("#1c1c1c"));
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT
                         );
@@ -78,7 +101,7 @@ public class DialogueSelectionFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     if (isAdded()) {
-                        Toast.makeText(getContext(), "Error loading dialogues: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Ошибка загрузки диалогов: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

@@ -11,13 +11,26 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
+/**
+ * LevelMainListFragment — фрагмент для отображения списка уровней слов.
+ * Загружает уровни из коллекции Firestore "levelsAll", отображает их в виде кнопок,
+ * позволяет перейти к редактированию существующего уровня или созданию нового.
+ */
 public class LevelMainListFragment extends Fragment {
 
     private LinearLayout levelContainer;
     private Button addLevelButton;
     private FirebaseFirestore db;
 
+    /**
+     * Инициализирует фрагмент, устанавливает layout, связывает элементы интерфейса,
+     * настраивает обработчик для кнопки добавления уровня и загружает список уровней.
+     *
+     * @param inflater           Объект для раздувания layout
+     * @param container          Родительский контейнер
+     * @param savedInstanceState Сохраненное состояние фрагмента
+     * @return                   Надутый View фрагмента
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_level_main_list, container, false);
@@ -36,18 +49,22 @@ public class LevelMainListFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Загружает уровни из Firestore и отображает их в виде кнопок.
+     * Каждая кнопка ведет к редактированию соответствующего уровня.
+     */
     private void loadLevels() {
         db.collection("levelsAll")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!isAdded()) return; // Проверяем, что фрагмент прикреплён
-                    levelContainer.removeAllViews(); // Очищаем контейнер перед загрузкой
+                    if (!isAdded()) return;
+                    levelContainer.removeAllViews();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String levelId = document.getId();
                         String levelName = document.getString("levelName");
 
                         Button levelButton = new Button(requireContext());
-                        levelButton.setText(levelName != null ? levelName : "Level: " + levelId);
+                        levelButton.setText(levelName != null ? levelName : "Уровень: " + levelId);
                         levelButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#363636")));
                         levelButton.setTextColor(android.graphics.Color.parseColor("#E0E0E0"));
                         levelButton.setTextSize(16);
@@ -67,19 +84,22 @@ public class LevelMainListFragment extends Fragment {
                         levelContainer.addView(levelButton);
                     }
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Toast.makeText(requireContext(), "No levels found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Уровни не найдены", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
                     if (isAdded()) {
-                        Toast.makeText(requireContext(), "Error loading levels: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Ошибка загрузки уровней: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+    /**
+     * Обновляет список уровней при возвращении фрагмента в активное состояние.
+     */
     @Override
     public void onResume() {
         super.onResume();
-        loadLevels(); // Обновляем список уровней при возвращении
+        loadLevels();
     }
 }

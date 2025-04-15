@@ -18,7 +18,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * LevelMainEditActivity — активность для редактирования или удаления существующего уровня слов.
+ * Позволяет изменить название уровня, 10 английских слов с переводами, сохраняет изменения
+ * в Firestore в коллекции "levelsAll" и обновляет данные у всех пользователей в коллекции "levels".
+ * Также поддерживает удаление уровня с последующей перенумерацией оставшихся уровней.
+ */
 public class LevelMainEditActivity extends AppCompatActivity {
 
     private EditText levelNameEditText;
@@ -28,6 +33,12 @@ public class LevelMainEditActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String levelId;
 
+    /**
+     * Инициализирует активность, устанавливает layout, связывает элементы интерфейса,
+     * загружает данные уровня по ID и настраивает обработчики для кнопок.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +58,9 @@ public class LevelMainEditActivity extends AppCompatActivity {
         deleteLevelButton.setOnClickListener(v -> deleteLevel());
     }
 
+    /**
+     * Инициализирует элементы интерфейса (поля ввода и кнопки).
+     */
     private void initializeViews() {
         levelNameEditText = findViewById(R.id.levelNameEditText);
 
@@ -76,6 +90,9 @@ public class LevelMainEditActivity extends AppCompatActivity {
         deleteLevelButton = findViewById(R.id.deleteLevelButton);
     }
 
+    /**
+     * Загружает данные уровня из Firestore.
+     */
     private void loadLevelData() {
         db.collection("levelsAll").document(levelId)
                 .get()
@@ -92,6 +109,11 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Заполняет поля ввода данными из документа Firestore.
+     *
+     * @param documentSnapshot Документ с данными уровня
+     */
     private void populateFields(DocumentSnapshot documentSnapshot) {
         String levelName = documentSnapshot.getString("levelName");
         Map<String, Object> details = (Map<String, Object>) documentSnapshot.get("details");
@@ -115,6 +137,9 @@ public class LevelMainEditActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Сохраняет измененные данные уровня в Firestore.
+     */
     private void saveLevelToFirestore() {
         String userLevelName = levelNameEditText.getText().toString().trim();
 
@@ -138,25 +163,27 @@ public class LevelMainEditActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Проверяет и собирает данные слов и переводов.
+     *
+     * @return Карта слов с переводами или null при ошибке
+     */
     private Map<String, String> validateAndGetWords() {
         Map<String, String> wordsMap = new HashMap<>();
         for (int i = 0; i < 10; i++) {
             String englishWord = englishWords[i].getText().toString().trim();
             String translation = translations[i].getText().toString().trim();
 
-            // Проверка на пустые поля
             if (englishWord.isEmpty() || translation.isEmpty()) {
                 Toast.makeText(this, "Заполните все поля слов и переводов", Toast.LENGTH_SHORT).show();
                 return null;
             }
 
-            // Проверка английского слова
             if (!englishWord.matches("^[a-zA-Z\\s.,!?'-]+$")) {
                 Toast.makeText(this, "Слово " + (i + 1) + " должно быть на английском", Toast.LENGTH_SHORT).show();
                 return null;
             }
 
-            // Проверка русского перевода
             if (!translation.matches("^[а-яА-ЯёЁ\\s.,!?'-]+$")) {
                 Toast.makeText(this, "Перевод " + (i + 1) + " должен быть на русском", Toast.LENGTH_SHORT).show();
                 return null;
@@ -167,9 +194,17 @@ public class LevelMainEditActivity extends AppCompatActivity {
         return wordsMap;
     }
 
+    /**
+     * Создает структуру данных уровня.
+     *
+     * @param levelName   Название уровня
+     * @param wordsMap    Карта слов с переводами
+     * @param levelNumber Номер уровня
+     * @return Данные уровня
+     */
     private Map<String, Object> createLevelData(String levelName, Map<String, String> wordsMap, int levelNumber) {
         Map<String, Object> levelDetails = new HashMap<>();
-        levelDetails.put("isUnlocked", levelNumber == 1); // Первый уровень всегда разблокирован
+        levelDetails.put("isUnlocked", levelNumber == 1);
         levelDetails.put("words", wordsMap);
 
         Map<String, Object> level = new HashMap<>();
@@ -180,6 +215,11 @@ public class LevelMainEditActivity extends AppCompatActivity {
         return level;
     }
 
+    /**
+     * Обновляет уровень в Firestore для всех пользователей.
+     *
+     * @param level Данные уровня
+     */
     private void updateLevelInFirestore(Map<String, Object> level) {
         WriteBatch batch = db.batch();
         batch.set(db.collection("levelsAll").document(levelId), level);
@@ -213,6 +253,13 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Обновляет уровень для конкретного пользователя.
+     *
+     * @param nickname Никнейм пользователя
+     * @param level    Данные уровня
+     * @return Задача Firestore
+     */
     private Task<Void> updateUserLevel(String nickname, Map<String, Object> level) {
         return db.collection("levels").document(nickname).get()
                 .continueWithTask(task -> {
@@ -231,6 +278,12 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Получает список уровней из документа.
+     *
+     * @param doc Документ Firestore
+     * @return Список уровней
+     */
     private List<Map<String, Object>> getLevelsListFromDoc(DocumentSnapshot doc) {
         List<Map<String, Object>> levels = new ArrayList<>();
         if (doc.contains("levels")) {
@@ -239,6 +292,12 @@ public class LevelMainEditActivity extends AppCompatActivity {
         return levels != null ? levels : new ArrayList<>();
     }
 
+    /**
+     * Обновляет или добавляет уровень в список.
+     *
+     * @param levels   Список уровней
+     * @param newLevel Новый уровень
+     */
     private void updateOrAddLevel(List<Map<String, Object>> levels, Map<String, Object> newLevel) {
         boolean found = false;
         for (int i = 0; i < levels.size(); i++) {
@@ -254,6 +313,13 @@ public class LevelMainEditActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Создает новый документ уровней для пользователя.
+     *
+     * @param userBatch Батч для записи
+     * @param nickname  Никнейм пользователя
+     * @param level     Данные уровня
+     */
     private void createNewUserLevel(WriteBatch userBatch, String nickname, Map<String, Object> level) {
         List<Map<String, Object>> levels = new ArrayList<>();
         levels.add(level);
@@ -262,6 +328,9 @@ public class LevelMainEditActivity extends AppCompatActivity {
         userBatch.set(db.collection("levels").document(nickname), newData);
     }
 
+    /**
+     * Удаляет уровень из Firestore и запускает перенумерацию.
+     */
     private void deleteLevel() {
         if (levelId == null) {
             Toast.makeText(this, "Нет уровня для удаления", Toast.LENGTH_SHORT).show();
@@ -284,6 +353,11 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Удаляет уровень у всех пользователей.
+     *
+     * @return Задача Firestore
+     */
     private Task<Void> removeLevelFromAllUsers() {
         return db.collection("users").get()
                 .continueWithTask(task -> {
@@ -303,6 +377,12 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Удаляет уровень у конкретного пользователя.
+     *
+     * @param nickname Никнейм пользователя
+     * @return Задача Firestore
+     */
     private Task<Void> removeLevelFromUser(String nickname) {
         return db.collection("levels").document(nickname).get()
                 .continueWithTask(task -> {
@@ -328,6 +408,9 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Перенумеровывает уровни после удаления.
+     */
     private void renumberLevels() {
         db.collection("levelsAll").orderBy("levelId").get()
                 .addOnSuccessListener(querySnapshot -> {
@@ -379,6 +462,11 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Обновляет ID уровней у всех пользователей.
+     *
+     * @param idMapping Карта соответствия старых и новых ID
+     */
     private void updateAllUsersLevels(Map<String, String> idMapping) {
         db.collection("users").get()
                 .addOnSuccessListener(querySnapshot -> {
@@ -391,6 +479,12 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Обновляет уровни конкретного пользователя.
+     *
+     * @param nickname  Никнейм пользователя
+     * @param idMapping Карта соответствия ID
+     */
     private void updateUserLevels(String nickname, Map<String, String> idMapping) {
         db.collection("levels").document(nickname).get()
                 .addOnSuccessListener(doc -> {
@@ -434,6 +528,12 @@ public class LevelMainEditActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Извлекает номер уровня из ID.
+     *
+     * @param levelId ID уровня
+     * @return Номер уровня
+     */
     private int extractLevelNumber(String levelId) {
         try {
             return Integer.parseInt(levelId.replace("level", ""));

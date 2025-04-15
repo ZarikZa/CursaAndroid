@@ -13,7 +13,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+/**
+ * DialogueAddActivity — активность для создания и сохранения нового диалога в Firestore.
+ * Позволяет ввести ID диалога, имя персонажа, пять фраз и по три варианта ответа для каждой.
+ * Проверяет корректность и уникальность данных, сохраняет диалог в коллекции "dialogues".
+ */
 public class DialogueAddActivity extends AppCompatActivity {
 
     private EditText dialogueIdEditText, characterEditText;
@@ -22,12 +26,17 @@ public class DialogueAddActivity extends AppCompatActivity {
     private Button saveButton;
     private FirebaseFirestore db;
 
+    /**
+     * Инициализирует активность, устанавливает layout, связывает элементы интерфейса
+     * и настраивает обработчики для кнопок сохранения и возврата.
+     *
+     * @param savedInstanceState Сохраненное состояние активности
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialogue_add);
 
-        // Инициализация элементов
         dialogueIdEditText = findViewById(R.id.dialogueIdEditText);
         characterEditText = findViewById(R.id.characterEditText);
 
@@ -62,6 +71,10 @@ public class DialogueAddActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveDialogue());
     }
 
+    /**
+     * Собирает данные из полей ввода, выполняет валидацию (пустота, английский язык, уникальность),
+     * проверяет уникальность ID диалога и сохраняет диалог в Firestore.
+     */
     private void saveDialogue() {
         String dialogueId = dialogueIdEditText.getText().toString().trim();
         String character = characterEditText.getText().toString().trim();
@@ -69,7 +82,6 @@ public class DialogueAddActivity extends AppCompatActivity {
         String[] phraseTexts = new String[5];
         String[][] phraseOptions = new String[5][3];
 
-        // Сбор данных из полей
         for (int i = 0; i < 5; i++) {
             phraseTexts[i] = phraseTextEditTexts[i].getText().toString().trim();
             for (int j = 0; j < 3; j++) {
@@ -77,52 +89,46 @@ public class DialogueAddActivity extends AppCompatActivity {
             }
         }
 
-        // Проверка на пустые поля
         if (dialogueId.isEmpty() || character.isEmpty()) {
-            Toast.makeText(this, "Please fill in Dialogue ID and Character", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Пожалуйста, заполните ID диалога и имя персонажа", Toast.LENGTH_SHORT).show();
             return;
         }
         for (int i = 0; i < 5; i++) {
             if (phraseTexts[i].isEmpty() || phraseOptions[i][0].isEmpty() ||
                     phraseOptions[i][1].isEmpty() || phraseOptions[i][2].isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields for Phrase " + (i + 1), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Пожалуйста, заполните все поля для фразы " + (i + 1), Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка, что фразы на английском
         for (int i = 0; i < 5; i++) {
             if (!phraseTexts[i].matches("^[a-zA-Z\\s.,!?'-]+$")) {
-                Toast.makeText(this, "Phrase " + (i + 1) + " must be in English", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Фраза " + (i + 1) + " должна быть на английском языке", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        // Проверка уникальности и английского языка для вариантов ответа
         for (int i = 0; i < 5; i++) {
             Set<String> optionsSet = new HashSet<>();
             for (int j = 0; j < 3; j++) {
                 String option = phraseOptions[i][j];
 
-                // Проверка на английский язык
                 if (!option.matches("^[a-zA-Z\\s.,!?'-]+$")) {
-                    Toast.makeText(this, "Phrase " + (i + 1) + " Option " + (j + 1) + " must be in English", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Фраза " + (i + 1) + ", вариант " + (j + 1) + " должен быть на английском языке", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Проверка на уникальность
                 if (!optionsSet.add(option)) {
-                    Toast.makeText(this, "Phrase " + (i + 1) + " has duplicate options", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Фраза " + (i + 1) + " содержит повторяющиеся варианты", Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
         }
 
-        // Проверка существования ID в Firestore
         db.collection("dialogues").document(dialogueId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        Toast.makeText(this, "Dialogue ID already exists", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "ID диалога уже существует", Toast.LENGTH_SHORT).show();
                     } else {
                         Map<String, Object> dialogueData = new HashMap<>();
                         dialogueData.put("character", character);
@@ -132,7 +138,7 @@ public class DialogueAddActivity extends AppCompatActivity {
                             Map<String, Object> phrase = new HashMap<>();
                             phrase.put("text", phraseTexts[i]);
                             List<Map<String, Object>> answers = new ArrayList<>();
-                            answers.add(createAnswer(phraseOptions[i][0], true)); // Option 1 - правильный
+                            answers.add(createAnswer(phraseOptions[i][0], true));
                             answers.add(createAnswer(phraseOptions[i][1], false));
                             answers.add(createAnswer(phraseOptions[i][2], false));
                             phrase.put("answers", answers);
@@ -141,24 +147,29 @@ public class DialogueAddActivity extends AppCompatActivity {
 
                         dialogueData.put("options", options);
 
-                        // Сохранение в Firestore
                         db.collection("dialogues")
                                 .document(dialogueId)
                                 .set(dialogueData)
                                 .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(this, "Dialogue added successfully", Toast.LENGTH_SHORT).show();
                                     finish();
                                 })
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Error adding dialogue: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                .addOnFailureListener(e-> {
+                                    Toast.makeText(this, "Ошибка при добавлении диалога: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 });
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error checking dialogue ID: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Ошибка при проверке ID диалога: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
+    /**
+     * Создает объект ответа с текстом и флагом правильности.
+     *
+     * @param text      Текст ответа
+     * @param isCorrect Флаг, указывающий, правильный ли ответ
+     * @return Карта с данными ответа
+     */
     private Map<String, Object> createAnswer(String text, boolean isCorrect) {
         Map<String, Object> answer = new HashMap<>();
         answer.put("text", text);
